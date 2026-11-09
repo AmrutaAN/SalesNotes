@@ -1,0 +1,55 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Customers & Accounts</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearchChange($any($event.target).value)"
+      placeholder="Search company or contact..."
+      [debounce]="250"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (loading) {
+    <div class="loading-box">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading accounts...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <ion-card color="danger">
+      <ion-card-content>
+        <p>{{ errorMessage }}</p>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  @if (!loading && customers.length > 0) {
+    <ion-list lines="inset">
+      @for (cust of customers; track cust.id) {
+        <ion-item class="cust-item">
+          <div slot="start" class="avatar-badge">
+            {{ cust.company ? cust.company.charAt(0).toUpperCase() : 'C' }}
+          </div>
+          <ion-label>
+            <h2 class="company-heading">{{ cust.company }}</h2>
+            <p class="contact-name">{{ cust.name }} &bull; {{ cust.industry || 'General' }}</p>
+            @if (cust.email) {
+              <p class="meta-sub">
+                <ion-icon name="mail-outline"></ion-icon> {{ cust.email }}
+              </p>
+            }
+          </ion-label>
+          <ion-note slot="end" color="primary">
+            {{ cust.phone || '' }}
+          </ion-note>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

@@ -1,0 +1,108 @@
+<div class="detail-page">
+  <div class="breadcrumb-nav">
+    <a routerLink="/notes" class="back-link">&larr; Back to Notes</a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading note details...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-sm btn-outline" (click)="noteId && loadNote(noteId)">Retry</button>
+    </div>
+  }
+
+  @if (note) {
+    <div class="detail-card">
+      <div class="detail-header">
+        <div>
+          <div class="category-pill" [style.background-color]="note.category?.color || '#3b82f6'">
+            {{ note.category?.name || 'Sales Note' }}
+          </div>
+          <h1 class="note-title">{{ note.title }}</h1>
+          <p class="timestamp">Created on {{ note.createdAt | date:'fullDate' }}</p>
+        </div>
+
+        <div class="detail-actions">
+          <a [routerLink]="['/notes', note.id, 'edit']" class="btn btn-primary">✏️ Edit Note</a>
+          <button class="btn btn-danger" (click)="deleteCurrentNote()">🗑️ Delete</button>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <span class="info-label">Customer / Company</span>
+          <strong class="info-val">{{ note.customer.company }}</strong>
+          <span class="info-sub">{{ note.customer.name }} ({{ note.customer.email || 'No email' }})</span>
+          <span class="info-sub">Phone: {{ note.customer.phone || 'N/A' }}</span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Deal Value</span>
+          <strong class="info-val text-success">
+            {{ note.dealAmount ? (note.dealAmount | currency:'USD':'symbol':'1.0-0') : 'Not specified' }}
+          </strong>
+          <span class="info-sub">Potential pipeline revenue</span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Priority Level</span>
+          <span class="badge" [ngClass]="'badge-' + note.priority.toLowerCase()">
+            {{ note.priority }}
+          </span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Status</span>
+          <span class="badge" [ngClass]="'badge-' + note.status.toLowerCase().replace('_', '-')">
+            {{ note.status.replace('_', ' ') }}
+          </span>
+          <div class="status-quick-switch">
+            <label class="switch-label">Change to:</label>
+            <select class="form-select form-select-sm" [value]="note.status" (change)="updateStatus($any($event.target).value)">
+              <option value="OPEN">OPEN</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="FOLLOW_UP_REQUIRED">FOLLOW_UP_REQUIRED</option>
+              <option value="WON">WON</option>
+              <option value="LOST">LOST</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h3>Meeting Notes & Details</h3>
+        <div class="note-body">
+          {{ note.content }}
+        </div>
+      </div>
+
+      @if (note.followUpDate) {
+        <div class="followup-alert">
+          <span class="alert-icon">📅</span>
+          <div>
+            <strong>Follow-up Scheduled</strong>
+            <p>Target date: {{ note.followUpDate | date:'mediumDate' }}</p>
+          </div>
+        </div>
+      }
+
+      @if (note.tags) {
+        <div class="tags-section">
+          <strong>Tags:</strong>
+          <div class="tag-list">
+            @for (tag of note.tags.split(','); track tag) {
+              <span class="tag-chip">#{{ tag.trim() }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,131 @@
+<div class="dashboard-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Sales Overview</h1>
+      <p class="page-subtitle">Track lead status, pipeline opportunities and recent sales interactions.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/notes/new" class="btn btn-primary">
+        <span>+ Add Sales Note</span>
+      </a>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading sales metrics...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-sm btn-outline" (click)="loadSummary()">Retry</button>
+    </div>
+  }
+
+  @if (summary) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon bg-blue">📝</div>
+        <div class="stat-content">
+          <span class="stat-label">Total Notes</span>
+          <span class="stat-value">{{ summary.totalNotes }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon bg-amber">⏳</div>
+        <div class="stat-content">
+          <span class="stat-label">Open Deals</span>
+          <span class="stat-value">{{ summary.openNotes }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon bg-green">🏆</div>
+        <div class="stat-content">
+          <span class="stat-label">Won Deals</span>
+          <span class="stat-value">{{ summary.wonNotes }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon bg-red">🔥</div>
+        <div class="stat-content">
+          <span class="stat-label">Urgent Follow-ups</span>
+          <span class="stat-value">{{ summary.urgentNotes }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card highlight-card">
+        <div class="stat-icon bg-purple">💰</div>
+        <div class="stat-content">
+          <span class="stat-label">Active Pipeline Value</span>
+          <span class="stat-value">{{ summary.totalPipelineValue | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Recent Sales Notes</h2>
+        <a routerLink="/notes" class="link-btn">View All Notes &rarr;</a>
+      </div>
+
+      @if (summary.recentNotes.length === 0) {
+        <div class="empty-state">
+          <p>No sales notes recorded yet.</p>
+          <a routerLink="/notes/new" class="btn btn-secondary">Create your first note</a>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title & Customer</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Deal Amount</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (note of summary.recentNotes; track note.id) {
+                <tr>
+                  <td>
+                    <div class="note-title-cell">
+                      <a [routerLink]="['/notes', note.id]" class="cell-link font-medium">{{ note.title }}</a>
+                      <span class="cell-subtitle">{{ note.customer.company }} ({{ note.customer.name }})</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="'badge-' + note.priority.toLowerCase()">
+                      {{ note.priority }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="'badge-' + note.status.toLowerCase().replace('_', '-')">
+                      {{ note.status.replace('_', ' ') }}
+                    </span>
+                  </td>
+                  <td class="font-semibold">
+                    {{ note.dealAmount ? (note.dealAmount | currency:'USD':'symbol':'1.0-0') : '—' }}
+                  </td>
+                  <td class="cell-muted">
+                    {{ note.createdAt | date:'shortDate' }}
+                  </td>
+                  <td>
+                    <a [routerLink]="['/notes', note.id]" class="btn btn-sm btn-outline">Details</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

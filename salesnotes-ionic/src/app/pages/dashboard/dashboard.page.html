@@ -1,0 +1,123 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>SalesNotes Mobile</ion-title>
+    <ion-button slot="end" fill="clear" color="light" (click)="loadSummary()">
+      <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Dashboard</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  @if (loading) {
+    <div class="loading-box">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading metrics...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <ion-card color="danger">
+      <ion-card-content>
+        <p>{{ errorMessage }}</p>
+        <ion-button fill="outline" color="light" size="small" (click)="loadSummary()">Retry</ion-button>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  @if (summary) {
+    <!-- Pipeline Value Hero Card -->
+    <ion-card class="pipeline-card">
+      <ion-card-header>
+        <ion-card-subtitle>Active Pipeline Opportunity</ion-card-subtitle>
+        <ion-card-title class="pipeline-amount">
+          {{ summary.totalPipelineValue | currency:'USD':'symbol':'1.0-0' }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        Across {{ summary.totalNotes }} sales touchpoints
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Key Metrics Grid -->
+    <ion-grid class="metrics-grid">
+      <ion-row>
+        <ion-col size="6">
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <div class="metric-icon amber">⏳</div>
+              <div class="metric-num">{{ summary.openNotes }}</div>
+              <div class="metric-text">Open Deals</div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="6">
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <div class="metric-icon green">🏆</div>
+              <div class="metric-num">{{ summary.wonNotes }}</div>
+              <div class="metric-text">Won Deals</div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col size="6">
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <div class="metric-icon red">🔥</div>
+              <div class="metric-num">{{ summary.urgentNotes }}</div>
+              <div class="metric-text">Urgent Notes</div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="6">
+          <ion-card class="metric-card">
+            <ion-card-content>
+              <div class="metric-icon blue">📝</div>
+              <div class="metric-num">{{ summary.totalNotes }}</div>
+              <div class="metric-text">Total Notes</div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Recent Sales Notes List -->
+    <div class="section-title-wrap">
+      <h3>Recent Customer Notes</h3>
+    </div>
+
+    <ion-list lines="inset" class="recent-list">
+      @for (note of summary.recentNotes; track note.id) {
+        <ion-item [routerLink]="['/tabs/notes', note.id]" detail="true">
+          <ion-label>
+            <h2>{{ note.title }}</h2>
+            <p>{{ note.customer.company }} &bull; {{ note.customer.name }}</p>
+            <p class="timestamp">{{ note.createdAt | date:'shortDate' }}</p>
+          </ion-label>
+          <div slot="end" class="item-end">
+            <ion-badge [color]="note.priority === 'URGENT' ? 'danger' : (note.priority === 'HIGH' ? 'warning' : 'primary')">
+              {{ note.priority }}
+            </ion-badge>
+            @if (note.dealAmount) {
+              <span class="deal-text">{{ note.dealAmount | currency:'USD':'symbol':'1.0-0' }}</span>
+            }
+          </div>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

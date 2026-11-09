@@ -1,0 +1,132 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">Cancel</ion-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Edit Note' : 'New Note' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button [strong]="true" (click)="submit()" [disabled]="submitting">
+        {{ submitting ? 'Saving...' : 'Save' }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (errorMessage) {
+    <ion-note color="danger" class="error-banner">
+      {{ errorMessage }}
+    </ion-note>
+  }
+
+  <form [formGroup]="noteForm" (ngSubmit)="submit()">
+    <ion-list lines="inset" class="form-list">
+      <!-- Title -->
+      <ion-item>
+        <ion-input
+          label="Title *"
+          labelPlacement="stacked"
+          formControlName="title"
+          placeholder="e.g. Q4 Cloud Discovery Call"
+        ></ion-input>
+      </ion-item>
+      @if (noteForm.get('title')?.touched && noteForm.get('title')?.invalid) {
+        <ion-note color="danger" class="field-error-note">Title is required (min 3 chars)</ion-note>
+      }
+
+      <!-- Customer -->
+      <ion-item>
+        <ion-select
+          label="Customer *"
+          labelPlacement="stacked"
+          formControlName="customerId"
+          placeholder="Select Customer / Company"
+          interface="action-sheet"
+        >
+          @for (cust of customers; track cust.id) {
+            <ion-select-option [value]="cust.id">
+              {{ cust.company }} ({{ cust.name }})
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <!-- Deal Amount -->
+      <ion-item>
+        <ion-input
+          label="Deal Value ($ USD)"
+          labelPlacement="stacked"
+          type="number"
+          formControlName="dealAmount"
+          placeholder="e.g. 50000"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Priority -->
+      <ion-item>
+        <ion-select
+          label="Priority"
+          labelPlacement="stacked"
+          formControlName="priority"
+          interface="popover"
+        >
+          @for (p of priorities; track p) {
+            <ion-select-option [value]="p">{{ p }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <!-- Status -->
+      <ion-item>
+        <ion-select
+          label="Status"
+          labelPlacement="stacked"
+          formControlName="status"
+          interface="popover"
+        >
+          @for (s of statuses; track s) {
+            <ion-select-option [value]="s">{{ s.replace('_', ' ') }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <!-- Follow-up Date -->
+      <ion-item>
+        <ion-input
+          label="Follow-Up Target Date"
+          labelPlacement="stacked"
+          type="date"
+          formControlName="followUpDate"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Tags -->
+      <ion-item>
+        <ion-input
+          label="Tags"
+          labelPlacement="stacked"
+          formControlName="tags"
+          placeholder="e.g. enterprise, renewal"
+        ></ion-input>
+      </ion-item>
+
+      <!-- Content -->
+      <ion-item>
+        <ion-textarea
+          label="Meeting Notes & Actions"
+          labelPlacement="stacked"
+          formControlName="content"
+          [autoGrow]="true"
+          rows="5"
+          placeholder="Enter conversation highlights, customer requirements, agreed deliverables..."
+        ></ion-textarea>
+      </ion-item>
+    </ion-list>
+
+    <div class="submit-btn-wrap">
+      <ion-button expand="block" type="submit" [disabled]="submitting">
+        {{ submitting ? 'Saving...' : (isEditMode ? 'Update Sales Note' : 'Create Sales Note') }}
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

@@ -1,0 +1,145 @@
+<div class="notes-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Sales Notes</h1>
+      <p class="page-subtitle">Search, filter, and track customer conversations and deal progress.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/notes/new" class="btn btn-primary">
+        <span>+ New Note</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="filter-card">
+    <div class="search-input-group">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Search notes by title, customer, tags or content..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+      />
+      @if (searchTerm) {
+        <button class="clear-search" (click)="onSearchChange('')">✕</button>
+      }
+    </div>
+
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="filter-label">Status:</label>
+        <div class="pill-group">
+          <button class="filter-pill" [class.active]="selectedStatus === 'ALL'" (click)="onStatusFilter('ALL')">All</button>
+          <button class="filter-pill" [class.active]="selectedStatus === 'OPEN'" (click)="onStatusFilter('OPEN')">Open</button>
+          <button class="filter-pill" [class.active]="selectedStatus === 'IN_PROGRESS'" (click)="onStatusFilter('IN_PROGRESS')">In Progress</button>
+          <button class="filter-pill" [class.active]="selectedStatus === 'FOLLOW_UP_REQUIRED'" (click)="onStatusFilter('FOLLOW_UP_REQUIRED')">Follow-Up</button>
+          <button class="filter-pill" [class.active]="selectedStatus === 'WON'" (click)="onStatusFilter('WON')">Won</button>
+          <button class="filter-pill" [class.active]="selectedStatus === 'LOST'" (click)="onStatusFilter('LOST')">Lost</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Priority:</label>
+        <div class="pill-group">
+          <button class="filter-pill" [class.active]="selectedPriority === 'ALL'" (click)="onPriorityFilter('ALL')">All</button>
+          <button class="filter-pill priority-urgent" [class.active]="selectedPriority === 'URGENT'" (click)="onPriorityFilter('URGENT')">Urgent</button>
+          <button class="filter-pill priority-high" [class.active]="selectedPriority === 'HIGH'" (click)="onPriorityFilter('HIGH')">High</button>
+          <button class="filter-pill priority-med" [class.active]="selectedPriority === 'MEDIUM'" (click)="onPriorityFilter('MEDIUM')">Medium</button>
+          <button class="filter-pill priority-low" [class.active]="selectedPriority === 'LOW'" (click)="onPriorityFilter('LOW')">Low</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading sales notes...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-sm btn-outline" (click)="loadNotes()">Retry</button>
+    </div>
+  }
+
+  @if (!loading && filteredNotes.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📂</div>
+      <h3>No sales notes found</h3>
+      <p>Try adjusting your search query or status filter, or create a new note.</p>
+      <a routerLink="/notes/new" class="btn btn-primary">+ Create Sales Note</a>
+    </div>
+  }
+
+  <!-- Notes Grid Cards -->
+  @if (!loading && filteredNotes.length > 0) {
+    <div class="notes-grid">
+      @for (note of filteredNotes; track note.id) {
+        <div class="note-card">
+          <div class="note-card-top">
+            <div class="category-pill" [style.background-color]="note.category?.color || '#3b82f6'">
+              {{ note.category?.name || 'General Note' }}
+            </div>
+            <div class="badges-row">
+              <span class="badge" [ngClass]="'badge-' + note.priority.toLowerCase()">
+                {{ note.priority }}
+              </span>
+              <span class="badge" [ngClass]="'badge-' + note.status.toLowerCase().replace('_', '-')">
+                {{ note.status.replace('_', ' ') }}
+              </span>
+            </div>
+          </div>
+
+          <h3 class="note-title">
+            <a [routerLink]="['/notes', note.id]">{{ note.title }}</a>
+          </h3>
+
+          <div class="customer-info">
+            <span class="icon">🏢</span>
+            <strong>{{ note.customer.company }}</strong>
+            <span class="contact-name">({{ note.customer.name }})</span>
+          </div>
+
+          <p class="note-excerpt">{{ note.content }}</p>
+
+          <div class="note-meta-row">
+            @if (note.dealAmount) {
+              <div class="meta-item deal-badge">
+                <span>💰</span>
+                <strong>{{ note.dealAmount | currency:'USD':'symbol':'1.0-0' }}</strong>
+              </div>
+            }
+            @if (note.followUpDate) {
+              <div class="meta-item">
+                <span>📅 Follow up:</span>
+                <span>{{ note.followUpDate | date:'mediumDate' }}</span>
+              </div>
+            }
+          </div>
+
+          @if (note.tags) {
+            <div class="tags-row">
+              @for (tag of note.tags.split(','); track tag) {
+                <span class="tag-chip">#{{ tag.trim() }}</span>
+              }
+            </div>
+          }
+
+          <div class="note-card-footer">
+            <span class="created-at">{{ note.createdAt | date:'shortDate' }}</span>
+            <div class="card-actions">
+              <a [routerLink]="['/notes', note.id, 'edit']" class="btn-icon" title="Edit note">✏️</a>
+              <button class="btn-icon text-danger" title="Delete note" (click)="note.id && deleteNote(note.id)">🗑️</button>
+              <a [routerLink]="['/notes', note.id]" class="btn btn-sm btn-outline">View Details</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

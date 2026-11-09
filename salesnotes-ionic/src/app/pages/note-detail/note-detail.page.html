@@ -1,0 +1,144 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/notes"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Note Details</ion-title>
+    @if (note) {
+      <ion-buttons slot="end">
+        <ion-button [routerLink]="['/tabs/notes', note.id, 'edit']">
+          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button color="light" (click)="deleteCurrentNote()">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (loading) {
+    <div class="loading-box">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading note...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <ion-card color="danger">
+      <ion-card-content>
+        <p>{{ errorMessage }}</p>
+        <ion-button fill="outline" color="light" size="small" (click)="noteId && loadNote(noteId)">Retry</ion-button>
+      </ion-card-content>
+    </ion-card>
+  }
+
+  @if (note) {
+    <ion-card class="detail-hero-card">
+      <ion-card-header>
+        <div class="card-top-badges">
+          <span class="category-pill" [style.background-color]="note.category?.color || '#3b82f6'">
+            {{ note.category?.name || 'Sales Note' }}
+          </span>
+          <ion-badge [color]="note.priority === 'URGENT' ? 'danger' : (note.priority === 'HIGH' ? 'warning' : 'primary')">
+            {{ note.priority }}
+          </ion-badge>
+        </div>
+        <ion-card-title class="note-heading">{{ note.title }}</ion-card-title>
+        <ion-card-subtitle>{{ note.createdAt | date:'fullDate' }}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Status Switcher -->
+        <div class="status-change-row">
+          <span class="status-label">Current Status:</span>
+          <ion-select
+            interface="popover"
+            [value]="note.status"
+            (ionChange)="updateStatus($any($event.detail).value)"
+            class="custom-select"
+          >
+            <ion-select-option value="OPEN">OPEN</ion-select-option>
+            <ion-select-option value="IN_PROGRESS">IN_PROGRESS</ion-select-option>
+            <ion-select-option value="FOLLOW_UP_REQUIRED">FOLLOW_UP_REQUIRED</ion-select-option>
+            <ion-select-option value="WON">WON</ion-select-option>
+            <ion-select-option value="LOST">LOST</ion-select-option>
+            <ion-select-option value="CLOSED">CLOSED</ion-select-option>
+          </ion-select>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Deal & Customer Details Card -->
+    <ion-card class="info-card">
+      <ion-list lines="full">
+        <ion-item>
+          <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h3>{{ note.customer.company }}</h3>
+            <p>{{ note.customer.name }} &bull; {{ note.customer.industry || 'General' }}</p>
+          </ion-label>
+        </ion-item>
+
+        @if (note.customer.email) {
+          <ion-item>
+            <ion-icon name="mail-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>
+              <h3>Email</h3>
+              <p>{{ note.customer.email }}</p>
+            </ion-label>
+          </ion-item>
+        }
+
+        @if (note.customer.phone) {
+          <ion-item>
+            <ion-icon name="call-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>
+              <h3>Phone</h3>
+              <p>{{ note.customer.phone }}</p>
+            </ion-label>
+          </ion-item>
+        }
+
+        @if (note.dealAmount) {
+          <ion-item>
+            <ion-icon name="cash-outline" slot="start" color="success"></ion-icon>
+            <ion-label>
+              <h3>Estimated Deal Revenue</h3>
+              <p class="deal-value">{{ note.dealAmount | currency:'USD':'symbol':'1.0-0' }}</p>
+            </ion-label>
+          </ion-item>
+        }
+
+        @if (note.followUpDate) {
+          <ion-item>
+            <ion-icon name="calendar-outline" slot="start" color="warning"></ion-icon>
+            <ion-label>
+              <h3>Target Follow-Up</h3>
+              <p>{{ note.followUpDate | date:'mediumDate' }}</p>
+            </ion-label>
+          </ion-item>
+        }
+      </ion-list>
+    </ion-card>
+
+    <!-- Notes Content Card -->
+    <ion-card class="notes-content-card">
+      <ion-card-header>
+        <ion-card-title class="section-title">Meeting Notes & Action Items</ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="content-text">
+        {{ note.content }}
+      </ion-card-content>
+    </ion-card>
+
+    @if (note.tags) {
+      <div class="tags-container">
+        @for (tag of note.tags.split(','); track tag) {
+          <span class="tag-pill">#{{ tag.trim() }}</span>
+        }
+      </div>
+    }
+  }
+</ion-content>

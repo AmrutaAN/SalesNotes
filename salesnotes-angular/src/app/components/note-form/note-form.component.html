@@ -1,0 +1,126 @@
+<div class="form-page">
+  <div class="breadcrumb-nav">
+    <a (click)="cancel()" class="back-link">&larr; Cancel and return</a>
+  </div>
+
+  <div class="form-card">
+    <div class="form-header">
+      <h1 class="page-title">{{ isEditMode ? 'Edit Sales Note' : 'Create New Sales Note' }}</h1>
+      <p class="page-subtitle">Record customer conversations, action items, pipeline deal amount and next steps.</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form [formGroup]="noteForm" (ngSubmit)="submit()" class="sales-form">
+      <!-- Title -->
+      <div class="form-group">
+        <label for="title" class="form-label">Note Title <span class="required">*</span></label>
+        <input
+          id="title"
+          type="text"
+          formControlName="title"
+          class="form-control"
+          placeholder="e.g. Q4 Cloud Migration Proposal Discussion"
+        />
+        @if (noteForm.get('title')?.touched && noteForm.get('title')?.invalid) {
+          <span class="field-error">Title is required (at least 3 characters).</span>
+        }
+      </div>
+
+      <!-- Customer & Deal Amount Row -->
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="customerId" class="form-label">Customer / Account <span class="required">*</span></label>
+          <select id="customerId" formControlName="customerId" class="form-select">
+            <option [ngValue]="null" disabled>Select Customer</option>
+            @for (cust of customers; track cust.id) {
+              <option [value]="cust.id">{{ cust.company }} — {{ cust.name }}</option>
+            }
+          </select>
+          @if (noteForm.get('customerId')?.touched && noteForm.get('customerId')?.invalid) {
+            <span class="field-error">Please select a customer.</span>
+          }
+        </div>
+
+        <div class="form-group col">
+          <label for="dealAmount" class="form-label">Estimated Deal Value ($ USD)</label>
+          <input
+            id="dealAmount"
+            type="number"
+            formControlName="dealAmount"
+            class="form-control"
+            placeholder="e.g. 25000"
+          />
+        </div>
+      </div>
+
+      <!-- Priority & Status Row -->
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="priority" class="form-label">Priority</label>
+          <select id="priority" formControlName="priority" class="form-select">
+            @for (p of priorities; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group col">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" formControlName="status" class="form-select">
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s.replace('_', ' ') }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Follow-up Date & Tags Row -->
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="followUpDate" class="form-label">Follow-up Target Date</label>
+          <input
+            id="followUpDate"
+            type="date"
+            formControlName="followUpDate"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group col">
+          <label for="tags" class="form-label">Tags (comma-separated)</label>
+          <input
+            id="tags"
+            type="text"
+            formControlName="tags"
+            class="form-control"
+            placeholder="e.g. q4, enterprise, security"
+          />
+        </div>
+      </div>
+
+      <!-- Note Content -->
+      <div class="form-group">
+        <label for="content" class="form-label">Note Content / Minutes / Action Items</label>
+        <textarea
+          id="content"
+          formControlName="content"
+          rows="6"
+          class="form-control"
+          placeholder="Detailed notes from the client meeting, objections raised, next steps agreed upon..."
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting">
+          {{ submitting ? 'Saving...' : (isEditMode ? 'Update Note' : 'Create Note') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

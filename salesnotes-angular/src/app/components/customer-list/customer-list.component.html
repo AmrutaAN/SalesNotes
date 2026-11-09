@@ -1,0 +1,73 @@
+<div class="customers-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Accounts & Customers</h1>
+      <p class="page-subtitle">Manage customer directory and access associated interaction logs.</p>
+    </div>
+  </div>
+
+  <div class="filter-card">
+    <div class="search-input-group">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Search customers by company or contact name..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading customers...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && customers.length > 0) {
+    <div class="customers-grid">
+      @for (cust of customers; track cust.id) {
+        <div class="customer-card">
+          <div class="customer-header">
+            <div class="avatar-circle">
+              {{ cust.company ? cust.company.charAt(0).toUpperCase() : 'C' }}
+            </div>
+            <div>
+              <h3 class="company-name">{{ cust.company }}</h3>
+              <span class="industry-badge">{{ cust.industry || 'General' }}</span>
+            </div>
+          </div>
+
+          <div class="customer-body">
+            <div class="detail-row">
+              <span class="label">Contact:</span>
+              <strong class="val">{{ cust.name }}</strong>
+            </div>
+            <div class="detail-row">
+              <span class="label">Email:</span>
+              <span class="val">{{ cust.email || '—' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Phone:</span>
+              <span class="val">{{ cust.phone || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="customer-footer">
+            <a [routerLink]="['/notes']" [queryParams]="{ customerId: cust.id }" class="btn btn-sm btn-outline">
+              View Notes
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

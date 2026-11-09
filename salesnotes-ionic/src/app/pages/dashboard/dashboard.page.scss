@@ -1,0 +1,125 @@
+.pipeline-card {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  margin: 0.5rem 0 1rem 0;
+
+  ion-card-subtitle {
+    color: #e0e7ff;
+    font-size: 0.85rem;
+  }
+
+  .pipeline-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-top: 0.25rem;
+  }
+
+  ion-card-content {
+    color: #e0e7ff;
+    font-size: 0.85rem;
+  }
+}
+
+.metrics-grid {
+  padding: 0;
+  margin-bottom: 1rem;
+
+  ion-col {
+    padding: 4px;
+  }
+}
+
+.metric-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+
+  ion-card-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .metric-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+
+  .metric-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .metric-text {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+}
+
+.section-title-wrap {
+  margin: 1.25rem 0 0.5rem 0;
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+}
+
+.recent-list {
+  border-radius: 12px;
+  overflow: hidden;
+
+  ion-item {
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+
+    h2 {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+
+    .timestamp {
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+  }
+
+  .item-end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+
+    .deal-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #10b981;
+    }
+  }
+}
+
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: #64748b;
+
+  p {
+    margin-top: 0.5rem;
+  }
+}

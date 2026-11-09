@@ -1,0 +1,37 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">💼</span>
+        <div class="brand-text">
+          <span class="brand-title">SalesNotes</span>
+          <span class="platform-tag">Angular Web</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+          📊 Dashboard
+        </a>
+        <a routerLink="/notes" routerLinkActive="active" class="nav-item">
+          📝 Sales Notes
+        </a>
+        <a routerLink="/customers" routerLinkActive="active" class="nav-item">
+          👥 Customers
+        </a>
+      </nav>
+
+      <div class="header-cta">
+        <a routerLink="/notes/new" class="btn btn-primary btn-sm">+ New Note</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer">
+    <p>SalesNotes Platform &bull; Powered by Angular + Ionic + Spring Boot &bull; Common Component Pattern</p>
+  </footer>
+</div>
