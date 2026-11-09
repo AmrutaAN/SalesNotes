@@ -1,0 +1,67 @@
+# ==============================================================================
+# Antigravity Ignore File (.antigravityignore)
+# Prevents unwanted build artifacts, dependencies, and temporary files
+# from being indexed or searched by the Antigravity AI coding assistant.
+# ==============================================================================
+
+# Node / Frontend Dependencies
+node_modules/
+*/node_modules/
+*/*/node_modules/
+
+# Angular & Ionic build artifacts
+.angular/
+*/.angular/
+dist/
+*/dist/
+www/
+*/www/
+
+# Java / Maven build outputs
+target/
+*/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Local database storage & temporary data files
+data/
+*/data/
+*.mv.db
+*.trace.db
+*.db
+*.sqlite
+
+# Git internal data
+.git/
+*/.git/
+
+# Logs and debug output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & Editor configuration
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Large binary document archives
+*.zip
+*.tar.gz
+*.7z
+*.rar
+
+# Environment secrets and credentials
+.env
+.env.local
+*.local
