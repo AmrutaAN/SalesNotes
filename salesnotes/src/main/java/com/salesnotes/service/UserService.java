@@ -1,0 +1,112 @@
+package com.salesnotes.service;
+
+import com.salesnotes.dto.UserRequest;
+import com.salesnotes.dto.UserResponse;
+import com.salesnotes.entity.User;
+import com.salesnotes.entity.UserRole;
+import com.salesnotes.repository.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public List<UserResponse> getAllUsers(String search, UserRole role, Boolean active) {
+        List<User> list;
+        if (search != null && !search.trim().isEmpty()) {
+            String term = search.trim();
+            list = userRepository.findByFullnameContainingIgnoreCaseOrUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(term, term, term);
+        } else if (role != null) {
+            list = userRepository.findByRole(role);
+        } else if (active != null) {
+            list = userRepository.findByActive(active);
+        } else {
+            list = userRepository.findAll();
+        }
+        return list.stream().map(UserResponse::fromEntity).collect(Collectors.toList());
+    }
+
+    public Optional<UserResponse> getUserById(Long id) {
+        return userRepository.findById(id).map(UserResponse::fromEntity);
+    }
+
+    public Optional<UserResponse> getUserByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCase(username).map(UserResponse::fromEntity);
+    }
+
+    public UserResponse createUser(UserRequest request) {
+        if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
+            throw new IllegalArgumentException("Username already in use: " + request.getUsername());
+        }
+        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            throw new IllegalArgumentException("Email already in use: " + request.getEmail());
+        }
+
+        User user = new User(
+                request.getUsername().trim(),
+                request.getFullname().trim(),
+                request.getEmail().trim(),
+                request.getPassword(),
+                request.getRole() != null ? request.getRole() : UserRole.COMPANYEMPLOYEE
+        );
+        if (request.getActive() != null) {
+            user.setActive(request.getActive());
+        }
+
+        User saved = userRepository.save(user);
+        return UserResponse.fromEntity(saved);
+    }
+
+    public Optional<UserResponse> updateUser(Long id, UserRequest request) {
+        return userRepository.findById(id).map(existing -> {
+            if (!existing.getUsername().equalsIgnoreCase(request.getUsername()) &&
+                    userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
+                throw new IllegalArgumentException("Username already taken: " + request.getUsername());
+            }
+            if (!existing.getEmail().equalsIgnoreCase(request.getEmail()) &&
+                    userRepository.existsByEmailIgnoreCase(request.getEmail())) {
+                throw new IllegalArgumentException("Email already taken: " + request.getEmail());
+            }
+
+            existing.setUsername(request.getUsername().trim());
+            existing.setFullname(request.getFullname().trim());
+            existing.setEmail(request.getEmail().trim());
+            if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+                existing.setPassword(request.getPassword());
+            }
+            if (request.getRole() != null) {
+                existing.setRole(request.getRole());
+            }
+            if (request.getActive() != null) {
+                existing.setActive(request.getActive());
+            }
+            return UserResponse.fromEntity(userRepository.save(existing));
+        });
+    }
+
+    public Optional<UserResponse> updateActiveStatus(Long id, boolean active) {
+        return userRepository.findById(id).map(existing -> {
+            existing.setActive(active);
+            return UserResponse.fromEntity(userRepository.save(existing));
+        });
+    }
+
+    public boolean deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+}

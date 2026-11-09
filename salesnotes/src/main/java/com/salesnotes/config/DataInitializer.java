@@ -4,12 +4,12 @@ import com.salesnotes.entity.*;
 import com.salesnotes.repository.CustomerRepository;
 import com.salesnotes.repository.NoteCategoryRepository;
 import com.salesnotes.repository.SalesNoteRepository;
+import com.salesnotes.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Configuration
 public class DataInitializer {
@@ -18,11 +18,32 @@ public class DataInitializer {
     CommandLineRunner initDatabase(
             CustomerRepository customerRepo,
             NoteCategoryRepository categoryRepo,
-            SalesNoteRepository noteRepo
+            SalesNoteRepository noteRepo,
+            UserRepository userRepo
     ) {
         return args -> {
+            // Seed Users if not present
+            if (userRepo.count() == 0) {
+                // 1) SYSADMIN
+                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", "Admin@123", UserRole.SYSADMIN);
+                sysadmin.setActive(true);
+                userRepo.save(sysadmin);
+
+                // 2) companyadmin
+                User companyAdmin = new User("companyadmin", "Alice Johnson (Company Admin)", "alice@acmecloud.com", "Admin@123", UserRole.COMPANYADMIN);
+                companyAdmin.setActive(true);
+                userRepo.save(companyAdmin);
+
+                // 3) companyemployee
+                User companyEmployee = new User("companyemployee", "Bob Miller (Sales Rep)", "bob@acmecloud.com", "User@123", UserRole.COMPANYEMPLOYEE);
+                companyEmployee.setActive(true);
+                userRepo.save(companyEmployee);
+
+                System.out.println("SalesNotes Data Initializer: Default users seeded (SYSADMIN, companyadmin, companyemployee)!");
+            }
+
             if (customerRepo.count() > 0) {
-                return; // Already initialized
+                return; // Customers already initialized
             }
 
             // Categories
