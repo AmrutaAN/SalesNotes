@@ -37,3 +37,8 @@ Thumbs.db
 .env
 .env.local
 *.local
+
+# Project documentation (kept local only)
+documents/
+*.docx
+
