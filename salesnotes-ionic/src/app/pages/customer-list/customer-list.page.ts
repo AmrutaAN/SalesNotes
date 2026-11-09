@@ -18,7 +18,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { businessOutline, mailOutline, callOutline } from 'ionicons/icons';
-import { CommonCustomerListComponent } from '../../common/components/common-customer-list/common-customer-list.component';
+import { CommonCustomerListComponent } from '@common/components/common-customer-list/common-customer-list.component';
 
 @Component({
   selector: 'app-customer-list-ionic',

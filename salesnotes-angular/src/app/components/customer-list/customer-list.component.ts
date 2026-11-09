@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CommonCustomerListComponent } from '../../common/components/common-customer-list/common-customer-list.component';
+import { CommonCustomerListComponent } from '@common/components/common-customer-list/common-customer-list.component';
 
 @Component({
   selector: 'app-customer-list',

@@ -16,7 +16,7 @@ import {
   IonSelectOption,
   IonNote
 } from '@ionic/angular';
-import { CommonNoteFormComponent } from '../../common/components/common-note-form/common-note-form.component';
+import { CommonNoteFormComponent } from '@common/components/common-note-form/common-note-form.component';
 
 @Component({
   selector: 'app-note-form-ionic',

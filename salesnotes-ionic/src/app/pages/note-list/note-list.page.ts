@@ -28,7 +28,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { addOutline, trashOutline, createOutline, businessOutline, timeOutline, checkmarkOutline } from 'ionicons/icons';
-import { CommonNoteListComponent } from '../../common/components/common-note-list/common-note-list.component';
+import { CommonNoteListComponent } from '@common/components/common-note-list/common-note-list.component';
 
 @Component({
   selector: 'app-note-list-ionic',

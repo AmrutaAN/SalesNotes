@@ -26,7 +26,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { statsChartOutline, cashOutline, alertCircleOutline, checkmarkCircleOutline, refreshOutline } from 'ionicons/icons';
-import { CommonDashboardComponent } from '../../common/components/common-dashboard/common-dashboard.component';
+import { CommonDashboardComponent } from '@common/components/common-dashboard/common-dashboard.component';
 
 @Component({
   selector: 'app-dashboard-ionic',

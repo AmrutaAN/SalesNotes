@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CommonDashboardComponent } from '../../common/components/common-dashboard/common-dashboard.component';
+import { CommonDashboardComponent } from '@common/components/common-dashboard/common-dashboard.component';
 
 @Component({
   selector: 'app-dashboard',

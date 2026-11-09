@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CommonNoteDetailComponent } from '../../common/components/common-note-detail/common-note-detail.component';
+import { CommonNoteDetailComponent } from '@common/components/common-note-detail/common-note-detail.component';
 
 @Component({
   selector: 'app-note-detail',
