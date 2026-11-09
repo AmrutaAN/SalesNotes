@@ -1,13 +1,17 @@
-# Production Profile (prod)
+# ==============================================================================
+# PROD Profile: Hosted Database from Server
+# Connects to your hosted database on a remote server/cloud
+# ==============================================================================
 server:
   port: ${PORT:8080}
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/salesnotes}
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    # Hosted Database Server (AWS RDS, Neon, Supabase, Azure, Google Cloud SQL, etc.)
+    url: ${HOSTED_DB_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://hosted-db-server.yourcloud.com:5432/salesnotes_prod?sslmode=require}}
+    driver-class-name: ${HOSTED_DB_DRIVER:${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}}
+    username: ${HOSTED_DB_USERNAME:${SPRING_DATASOURCE_USERNAME:salesnotes_admin}}
+    password: ${HOSTED_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:HostedPassword123!}}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -27,4 +31,4 @@ spring:
 
 app:
   environment: prod
-  profile-description: "Production profile with external SQL database"
+  database-type: "Hosted Database from Server"

@@ -27,10 +27,10 @@ SalesNotes/
 │   │   ├── repository/                   # Spring Data JPA Repositories: UserRepository, SalesNoteRepository, etc.
 │   │   └── service/                      # Business Services: UserService, SalesNoteService, CustomerService, DashboardService
 │   ├── src/main/resources/
-│   │   ├── application.yml               # Base configuration (default active profile: devlocal)
-│   │   ├── application-devlocal.yml      # devlocal profile (H2 in-memory SQL DB, console, SQL logging)
-│   │   └── application-prod.yml          # prod profile (Production SQL DB: PostgreSQL/MySQL, HikariCP)
-│   ├── pom.xml
+│   │   ├── application.yml               # Base configuration (profiles.active: @active.profile@)
+│   │   ├── application-devlocal.yml      # devlocal profile (Local system database, console, SQL logging)
+│   │   └── application-prod.yml          # prod profile (Hosted database from server/cloud)
+│   ├── pom.xml                           # Maven profiles (devlocal, prod)
 │   └── mvnw / mvnw.cmd
 │
 ├── salesnotes-angular/                   # 2) Angular Web Application
@@ -45,7 +45,7 @@ SalesNotes/
 └── salesnotes-ionic/                     # 3) Ionic Mobile Application
     ├── src/
     │   ├── app/
-    │   │   ├── common/                   # Common[ComponentName] base components
+    │   │   ├── common/                   # Linked to salesnotes-angular/src/app/common
     │   │   ├── pages/                    # Mobile pages extending Common* base components
     │   │   └── tabs/                     # Ionic Tab Bar & navigation
     │   └── environments/                 # environment.devlocal.ts & environment.prod.ts
@@ -55,40 +55,65 @@ SalesNotes/
 
 ---
 
-## ⚙️ Environments & Profiles: `devlocal` and `prod`
+## ⚙️ Environments & Maven Profiles: `devlocal` and `prod`
 
-The application includes two distinct profiles:
+The application includes two Maven profiles configured in `pom.xml`:
 
-### 1. `devlocal` (Default Profile)
-Designed for local development with zero external dependencies:
-- **Database**: In-memory H2 SQL Database (`jdbc:h2:mem:salesnotesdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE`).
-- **H2 Console**: Enabled at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:salesnotesdb`, User: `sa`).
-- **SQL Logging**: Enabled (`show-sql: true`, formatted SQL output).
-- **Data Seed**: Automatically seeds default users and demo customer records on startup.
+```xml
+<profiles>
+    <profile>
+        <id>devlocal</id>
+        <properties>
+            <active.profile>devlocal</active.profile>
+        </properties>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
+    </profile>
+    <profile>
+        <id>prod</id>
+        <properties>
+            <active.profile>prod</active.profile>
+        </properties>
+    </profile>
+</profiles>
+```
 
-Run with `devlocal`:
+When building or running, Maven resource filtering injects `<active.profile>` into `application.yml`:
+```yaml
+spring:
+  profiles:
+    active: @active.profile@
+```
+
+### 1. `devlocal` (Default Profile — Local System Database)
+Configured in `application-devlocal.yml`:
+- **Database**: Local System Database (`jdbc:h2:file:./data/salesnotes_local` or local PostgreSQL/MySQL via `LOCAL_DB_URL`).
+- **H2 Console**: Enabled at `http://localhost:8080/h2-console`.
+- **SQL Logging**: Enabled (`show-sql: true` with formatted output).
+- **Seed Data**: Automatically seeds default users and demo records.
+
+Run with `devlocal` (default):
 ```bash
 cd salesnotes
 .\mvnw.cmd spring-boot:run
-# Or explicitly:
-.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=devlocal
+# Or explicitly with Maven profile:
+.\mvnw.cmd spring-boot:run -Pdevlocal
 ```
 
-### 2. `prod` (Production Profile)
-Designed for production environments using external SQL databases (PostgreSQL or MySQL):
-- **Database**: Configurable via standard environment variables:
-  - `SPRING_DATASOURCE_URL` (default: `jdbc:postgresql://localhost:5432/salesnotes`)
-  - `SPRING_DATASOURCE_DRIVER` (default: `org.postgresql.Driver`)
-  - `SPRING_DATASOURCE_USERNAME` (default: `postgres`)
-  - `SPRING_DATASOURCE_PASSWORD` (default: `password`)
-- **Connection Pool**: Optimized HikariCP pooling (pool size: 20, connection timeout: 20s).
-- **H2 Console**: Disabled.
-- **SQL Logging**: Disabled (`show-sql: false`).
+### 2. `prod` (Production Profile — Hosted Database from Server)
+Configured in `application-prod.yml`:
+- **Database**: Hosted Database Server (AWS RDS, Neon, Supabase, Google Cloud SQL, etc.):
+  - `HOSTED_DB_URL` / `SPRING_DATASOURCE_URL` (default: `jdbc:postgresql://hosted-db-server.yourcloud.com:5432/salesnotes_prod?sslmode=require`)
+  - `HOSTED_DB_USERNAME` / `SPRING_DATASOURCE_USERNAME`
+  - `HOSTED_DB_PASSWORD` / `SPRING_DATASOURCE_PASSWORD`
+- **Connection Pool**: Optimized HikariCP pooling (pool size: 20).
+- **H2 Console & SQL Logging**: Disabled.
 
 Run with `prod`:
 ```bash
 cd salesnotes
-.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=prod
+.\mvnw.cmd spring-boot:run -Pprod
 ```
 
 ---
@@ -123,15 +148,24 @@ The `users` table is defined with the following schema:
 
 ---
 
-## 📡 Users REST API Reference
+## 📡 REST API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
+| `GET` | `/api/dashboard/summary` | Fetch pipeline metrics and recent notes |
+| `GET` | `/api/notes` | List notes (supports `search`, `status`, `priority`, `customerId`) |
+| `GET` | `/api/notes/{id}` | Get note details by ID |
+| `POST` | `/api/notes` | Create a new sales note |
+| `PUT` | `/api/notes/{id}` | Update existing sales note |
+| `PATCH` | `/api/notes/{id}/status` | Update only note status |
+| `DELETE` | `/api/notes/{id}` | Delete a sales note |
+| `GET` | `/api/customers` | List customers (supports `search`) |
+| `POST` | `/api/customers` | Create a new customer |
 | `GET` | `/api/users` | List all users (supports `search`, `role`, `active`) |
 | `GET` | `/api/users/{id}` | Get user by ID |
 | `POST` | `/api/users` | Create a new user (with role validation) |
 | `PUT` | `/api/users/{id}` | Update existing user details |
-| `PATCH` | `/api/users/{id}/status` | Activate / deactivate a user (`{"active": true/false}`) |
+| `PATCH` | `/api/users/{id}/status` | Activate / deactivate a user |
 | `DELETE` | `/api/users/{id}` | Delete a user |
 
 ---
@@ -141,31 +175,27 @@ The `users` table is defined with the following schema:
 The code commonly used from Angular and Ionic from `component.ts` is defined in separate `common[componentname]` components:
 
 ```
-                  +-----------------------------------+
-                  |      CommonNoteListComponent      |
-                  |     (common-note-list.component)  |
-                  |                                   |
-                  | - Injected SalesNoteService       |
-                  | - notes: SalesNote[]              |
-                  | - filteredNotes: SalesNote[]      |
-                  | - loading: boolean                |
-                  | - searchTerm, status, priority    |
-                  | - loadNotes(), applyFilter()      |
-                  | - deleteNote(), updateStatus()    |
-                  +-----------------+-----------------+
-                                    |
-            +-----------------------+-----------------------+
-            |                                               |
-            v                                               v
-+-------------------------------+       +------------------------------------+
-|       NoteListComponent       |       |       NoteListIonicComponent       |
-|    (salesnotes-angular)       |       |        (salesnotes-ionic)          |
-|                               |       |                                    |
-| - Extends CommonNoteList      |       | - Extends CommonNoteList           |
-| - Angular Web HTML Table &    |       | - Ionic <ion-content>, <ion-card>, |
-|   Responsive SaaS Grid UI     |       |   <ion-searchbar>, <ion-refresher> |
-| - Desktop search & modal UI   |       |   <ion-item-sliding>, <ion-fab>    |
-+-------------------------------+       +------------------------------------+
+                       +----------------------------------------------------+
+                       |      CommonNoteListComponent (@common)             |
+                       |  - notes, filteredNotes, loading, errorMessage     |
+                       |  - searchTerm, selectedStatus, selectedPriority    |
+                       |  - loadNotes(), applyFilter(), deleteNote()...     |
+                       +-------------------------+--------------------------+
+                                                 |
+                     +---------------------------+---------------------------+
+                     |                                                       |
+                     v                                                       v
++------------------------------------------+    +------------------------------------------+
+|  Angular Component (Web)                 |    |  Ionic Component (Mobile)                |
+|  NoteListComponent extends Common...     |    |  NoteListIonicComponent extends Common...|
+|                                          |    |                                          |
+|  note-list.component.html:               |    |  note-list.page.html:                    |
+|  - Desktop SaaS Table & Grid             |    |  - <ion-header>, <ion-toolbar>           |
+|  - Search Bar & Status Filter Pills      |    |  - <ion-searchbar>, <ion-segment>        |
+|  - Web Action Buttons & Badges           |    |  - <ion-refresher> (pull-to-refresh)     |
+|                                          |    |  - <ion-item-sliding> (swipe to delete)  |
+|                                          |    |  - <ion-fab> (mobile action button)      |
++------------------------------------------+    +------------------------------------------+
 ```
 
 ### Components Implemented:

@@ -16,6 +16,7 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<active.profile>devlocal</active.profile>
 	</properties>
 
 	<dependencies>
@@ -53,7 +54,31 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>devlocal</id>
+			<properties>
+				<active.profile>devlocal</active.profile>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<active.profile>prod</active.profile>
+			</properties>
+		</profile>
+	</profiles>
+
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

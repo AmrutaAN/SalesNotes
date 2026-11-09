@@ -1,13 +1,18 @@
-# Development Local Profile (devlocal)
+# ==============================================================================
+# DEVLOCAL Profile: Local System Database
+# Connects to your local system database
+# ==============================================================================
 server:
   port: 8080
 
 spring:
   datasource:
-    url: jdbc:h2:mem:salesnotesdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
+    # Local System Database:
+    # Defaults to local system database file (can be overridden with local MySQL or local Postgres)
+    url: ${LOCAL_DB_URL:jdbc:h2:file:./data/salesnotes_local;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    driver-class-name: ${LOCAL_DB_DRIVER:org.h2.Driver}
+    username: ${LOCAL_DB_USERNAME:sa}
+    password: ${LOCAL_DB_PASSWORD:}
   h2:
     console:
       enabled: true
@@ -22,4 +27,4 @@ spring:
 
 app:
   environment: devlocal
-  profile-description: "Local development with in-memory H2 SQL database and seeded test data"
+  database-type: "Local System Database"
