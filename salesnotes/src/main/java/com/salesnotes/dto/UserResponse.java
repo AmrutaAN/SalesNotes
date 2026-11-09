@@ -6,10 +6,13 @@ import java.time.LocalDateTime;
 
 public class UserResponse {
 
-    private Long id;
+    private String id;
+    private String organisationId;
+    private String organisationName;
     private String username;
     private String fullname;
     private String email;
+    private String phone;
     private UserRole role;
     private Boolean active;
     private LocalDateTime createdat;
@@ -21,9 +24,14 @@ public class UserResponse {
     public static UserResponse fromEntity(User user) {
         UserResponse res = new UserResponse();
         res.setId(user.getId());
+        if (user.getOrganisation() != null) {
+            res.setOrganisationId(user.getOrganisation().getId());
+            res.setOrganisationName(user.getOrganisation().getName());
+        }
         res.setUsername(user.getUsername());
         res.setFullname(user.getFullname());
         res.setEmail(user.getEmail());
+        res.setPhone(user.getPhone());
         res.setRole(user.getRole());
         res.setActive(user.getActive());
         res.setCreatedat(user.getCreatedat());
@@ -31,12 +39,28 @@ public class UserResponse {
         return res;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public String getOrganisationId() {
+        return organisationId;
+    }
+
+    public void setOrganisationId(String organisationId) {
+        this.organisationId = organisationId;
+    }
+
+    public String getOrganisationName() {
+        return organisationName;
+    }
+
+    public void setOrganisationName(String organisationName) {
+        this.organisationName = organisationName;
     }
 
     public String getUsername() {
@@ -61,6 +85,14 @@ public class UserResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public UserRole getRole() {

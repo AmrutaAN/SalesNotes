@@ -37,7 +37,7 @@ public class UserService {
         return list.stream().map(UserResponse::fromEntity).collect(Collectors.toList());
     }
 
-    public Optional<UserResponse> getUserById(Long id) {
+    public Optional<UserResponse> getUserById(String id) {
         return userRepository.findById(id).map(UserResponse::fromEntity);
     }
 
@@ -68,7 +68,7 @@ public class UserService {
         return UserResponse.fromEntity(saved);
     }
 
-    public Optional<UserResponse> updateUser(Long id, UserRequest request) {
+    public Optional<UserResponse> updateUser(String id, UserRequest request) {
         return userRepository.findById(id).map(existing -> {
             if (!existing.getUsername().equalsIgnoreCase(request.getUsername()) &&
                     userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
@@ -95,14 +95,14 @@ public class UserService {
         });
     }
 
-    public Optional<UserResponse> updateActiveStatus(Long id, boolean active) {
+    public Optional<UserResponse> updateActiveStatus(String id, boolean active) {
         return userRepository.findById(id).map(existing -> {
             existing.setActive(active);
             return UserResponse.fromEntity(userRepository.save(existing));
         });
     }
 
-    public boolean deleteUser(Long id) {
+    public boolean deleteUser(String id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
             return true;

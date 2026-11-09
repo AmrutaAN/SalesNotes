@@ -1,14 +1,12 @@
 package com.salesnotes.config;
 
 import com.salesnotes.entity.*;
-import com.salesnotes.repository.CustomerRepository;
-import com.salesnotes.repository.NoteCategoryRepository;
-import com.salesnotes.repository.SalesNoteRepository;
-import com.salesnotes.repository.UserRepository;
+import com.salesnotes.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Configuration
@@ -19,47 +17,131 @@ public class DataInitializer {
             CustomerRepository customerRepo,
             NoteCategoryRepository categoryRepo,
             SalesNoteRepository noteRepo,
-            UserRepository userRepo
+            UserRepository userRepo,
+            OrganisationRepository orgRepo,
+            TagRepository tagRepo,
+            CatalogueItemRepository catalogueRepo,
+            ItemPriceTierRepository tierRepo
     ) {
         return args -> {
-            // Seed Users if not present
+            // 1. Seed Default Organisation
+            Organisation defaultOrg = orgRepo.findBySlug("acme-global").orElseGet(() -> {
+                Organisation org = new Organisation("Acme Global Corporation", "acme-global");
+                org.setTimezone("Asia/Kolkata");
+                org.setCurrencyCode("INR");
+                return orgRepo.save(org);
+            });
+
+            // 2. Seed Users if not present
             if (userRepo.count() == 0) {
-                // 1) SYSADMIN
+                // SYSADMIN
                 User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", "Admin@123", UserRole.SYSADMIN);
+                sysadmin.setOrganisation(defaultOrg);
                 sysadmin.setActive(true);
                 userRepo.save(sysadmin);
 
-                // 2) companyadmin
+                // companyadmin
                 User companyAdmin = new User("companyadmin", "Alice Johnson (Company Admin)", "alice@acmecloud.com", "Admin@123", UserRole.COMPANYADMIN);
+                companyAdmin.setOrganisation(defaultOrg);
                 companyAdmin.setActive(true);
                 userRepo.save(companyAdmin);
 
-                // 3) companyemployee
-                User companyEmployee = new User("companyemployee", "Bob Miller (Sales Rep)", "bob@acmecloud.com", "User@123", UserRole.COMPANYEMPLOYEE);
+                // companyemployee
+                User companyEmployee = new User("companyemployee", "Rahul Sharma (Field Rep)", "rahul@acmecloud.com", "User@123", UserRole.COMPANYEMPLOYEE);
+                companyEmployee.setOrganisation(defaultOrg);
                 companyEmployee.setActive(true);
                 userRepo.save(companyEmployee);
 
                 System.out.println("SalesNotes Data Initializer: Default users seeded (SYSADMIN, companyadmin, companyemployee)!");
             }
 
-            if (customerRepo.count() > 0) {
-                return; // Customers already initialized
+            // 3. Seed Default Pointer Tags
+            if (tagRepo.count() == 0) {
+                Tag tOrder = new Tag(defaultOrg, "ORDER", "Place Order", "#16A34A");
+                tOrder.setDescription("Client indicated intent to purchase or reorder items");
+                tOrder.setIsSystem(true);
+                tOrder.setSortOrder(1);
+                tagRepo.save(tOrder);
+
+                Tag tComplaint = new Tag(defaultOrg, "COMPLAINT", "Raise Complaint", "#DC2626");
+                tComplaint.setDescription("Client raised dissatisfaction, defect, or shipment delay");
+                tComplaint.setIsSystem(true);
+                tComplaint.setSortOrder(2);
+                tagRepo.save(tComplaint);
+
+                Tag tInfo = new Tag(defaultOrg, "INFO", "Information", "#2563EB");
+                tInfo.setDescription("Client preferences, budget cycles, upcoming events, key contacts");
+                tInfo.setIsSystem(true);
+                tInfo.setSortOrder(3);
+                tagRepo.save(tInfo);
+
+                Tag tFollowup = new Tag(defaultOrg, "FOLLOWUP", "Follow Up", "#D97706");
+                tFollowup.setDescription("Requires follow-up call, visit, or email with due date");
+                tFollowup.setIsSystem(true);
+                tFollowup.setSortOrder(4);
+                tagRepo.save(tFollowup);
+
+                Tag tPrice = new Tag(defaultOrg, "PRICE", "Pricing Query", "#9333EA");
+                tPrice.setDescription("Inquiry regarding volume pricing, tiers, or special discount approvals");
+                tPrice.setIsSystem(true);
+                tPrice.setSortOrder(5);
+                tagRepo.save(tPrice);
+
+                System.out.println("SalesNotes Data Initializer: System tags seeded (ORDER, COMPLAINT, INFO, FOLLOWUP, PRICE)!");
             }
 
-            // Categories
+            // 4. Seed Product Catalogue
+            if (catalogueRepo.count() == 0) {
+                User adminUser = userRepo.findByUsernameIgnoreCase("companyadmin").orElse(null);
+                if (adminUser != null) {
+                    CatalogueItem item1 = new CatalogueItem(
+                            defaultOrg, adminUser, "SKU-FAST-01",
+                            "Heavy Duty Industrial Fasteners (Grade 8)", "Box",
+                            new BigDecimal("1500.00")
+                    );
+                    item1.setCategory("Hardware");
+                    item1.setDescription("High tensile zinc-plated fasteners for structural assemblies");
+                    item1.setDefaultDiscountPct(new BigDecimal("5.00"));
+                    item1.setTaxRatePct(new BigDecimal("18.00"));
+                    item1.setHasTieredPricing(true);
+                    item1 = catalogueRepo.save(item1);
+
+                    tierRepo.save(new ItemPriceTier(item1, 1, 49, new BigDecimal("5.00"), "Standard (1-49 Boxes)"));
+                    tierRepo.save(new ItemPriceTier(item1, 50, 99, new BigDecimal("10.00"), "Wholesale (50-99 Boxes)"));
+                    tierRepo.save(new ItemPriceTier(item1, 100, null, new BigDecimal("15.00"), "Bulk Volume (100+ Boxes)"));
+
+                    CatalogueItem item2 = new CatalogueItem(
+                            defaultOrg, adminUser, "SKU-LUB-02",
+                            "Synthetic Heavy Machinery Lubricant 20L", "Bucket",
+                            new BigDecimal("4500.00")
+                    );
+                    item2.setCategory("Chemicals");
+                    item2.setDescription("Extended drain interval high-viscosity synthetic gear lubricant");
+                    item2.setDefaultDiscountPct(new BigDecimal("8.00"));
+                    item2.setTaxRatePct(new BigDecimal("18.00"));
+                    item2.setHasTieredPricing(false);
+                    catalogueRepo.save(item2);
+
+                    System.out.println("SalesNotes Data Initializer: Catalogue items and price tiers seeded!");
+                }
+            }
+
+            // 5. Seed Legacy Notes & Customers (if not present)
+            if (customerRepo.count() > 0) {
+                return;
+            }
+
             NoteCategory discovery = categoryRepo.save(new NoteCategory("Discovery Call", "#3b82f6"));
             NoteCategory demo = categoryRepo.save(new NoteCategory("Product Demo", "#8b5cf6"));
             NoteCategory proposal = categoryRepo.save(new NoteCategory("Proposal Sent", "#f59e0b"));
             NoteCategory negotiation = categoryRepo.save(new NoteCategory("Negotiation", "#ec4899"));
             NoteCategory closing = categoryRepo.save(new NoteCategory("Closing", "#10b981"));
 
-            // Customers
             Customer c1 = customerRepo.save(new Customer("Sarah Jenkins", "Acme Cloud Corp", "sarah.j@acmecloud.com", "+1-555-0101", "Technology"));
             Customer c2 = customerRepo.save(new Customer("Michael Zhang", "Apex Global Logistics", "mzhang@apexlogistics.com", "+1-555-0102", "Transportation"));
             Customer c3 = customerRepo.save(new Customer("Elena Rodriguez", "Horizon Health Systems", "erodriguez@horizonhealth.org", "+1-555-0103", "Healthcare"));
             Customer c4 = customerRepo.save(new Customer("David Kim", "Sterling Financial Group", "dkim@sterlingfin.com", "+1-555-0104", "Finance"));
 
-            // Sales Notes
             SalesNote n1 = new SalesNote();
             n1.setTitle("Enterprise SaaS Platform - Discovery Session");
             n1.setContent("Met with VP of Engineering Sarah and CTO. They need to migrate 200+ agents from legacy CRM. Key requirements: offline support, multi-device sync, and custom SQL analytics. Strong intent, budget approved for Q4.");
