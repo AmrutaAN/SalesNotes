@@ -10,5 +10,6 @@ import java.util.List;
 public interface ExportRecordRepository extends JpaRepository<ExportRecord, String> {
     List<ExportRecord> findByClipboardSessionId(String sessionId);
     List<ExportRecord> findByExportedByIdOrderByExportedAtDesc(String userId);
+    List<ExportRecord> findByOrganisationIdOrderByExportedAtDesc(String organisationId);
     List<ExportRecord> findByOrganisationIdAndTargetModule(String organisationId, String targetModule);
 }
