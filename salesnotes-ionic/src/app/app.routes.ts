@@ -13,6 +13,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/login/login.page').then((m) => m.LoginIonicPage),
   },
   {
+    path: 'reset-password',
+    loadComponent: () => import('./pages/login/login.page').then((m) => m.LoginIonicPage),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/login/login.page').then((m) => m.LoginIonicPage),
+  },
+  {
     path: 'tabs',
     canActivate: [authGuard],
     loadChildren: () => import('./tabs/tabs.routes').then((m) => m.routes),

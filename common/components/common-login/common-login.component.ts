@@ -87,14 +87,25 @@ export class CommonLoginComponent implements OnInit {
       this.returnUrl = queryReturnUrl;
     }
 
-    // Check if opened with reset token in query params
-    const tokenParam = this.route.snapshot.queryParams['token'];
-    const userParam = this.route.snapshot.queryParams['user'];
-    if (tokenParam) {
-      this.tokenInput = tokenParam;
-      if (userParam) {
-        this.tokenUser = userParam;
+    // Subscribe to query params so changes (e.g. clicking a reset link with token) update reactively
+    this.route.queryParams.subscribe(params => {
+      const tokenParam = params['token'];
+      const userParam = params['user'];
+      if (tokenParam) {
+        this.tokenInput = tokenParam;
+        if (userParam) {
+          this.tokenUser = userParam;
+        }
+        this.viewMode = 'reset_token';
+        this.cdr.markForCheck();
       }
+    });
+
+    // Check if loaded on /forgot-password or /reset-password routes
+    const currentPath = this.route.snapshot.routeConfig?.path;
+    if (currentPath === 'forgot-password') {
+      this.viewMode = 'forgot_options';
+    } else if (currentPath === 'reset-password' && !this.route.snapshot.queryParams['token']) {
       this.viewMode = 'reset_token';
     }
   }
@@ -109,11 +120,18 @@ export class CommonLoginComponent implements OnInit {
     this.showConfirmPassword = false;
     this.showTokenNewPassword = false;
     this.showTokenConfirmPassword = false;
-    if (mode === 'login') {
-      // keep username if typed
-    } else if (mode === 'forgot_options' && this.username.trim()) {
-      this.forgotUser = this.username.trim();
-      this.emailOrUserInput = this.username.trim();
+    if (mode === 'request_email') {
+      this.generatedToken = '';
+      this.generatedResetUrl = '';
+      this.generatedEmail = '';
+    } else if (mode === 'forgot_options') {
+      this.generatedToken = '';
+      this.generatedResetUrl = '';
+      this.generatedEmail = '';
+      if (this.username.trim()) {
+        this.forgotUser = this.username.trim();
+        this.emailOrUserInput = this.username.trim();
+      }
     }
     this.cdr.markForCheck();
   }
@@ -165,8 +183,8 @@ export class CommonLoginComponent implements OnInit {
 
   // --- Scenario 1A: Reset password using old password verification ---
   submitResetUsingOld(): void {
-    if (!this.forgotUser.trim() || !this.oldPwdInput.trim() || !this.newPwdInput.trim()) {
-      this.errorMessage = 'All fields (Username, Old Password, New Password) are required.';
+    if (!this.forgotUser.trim() || !this.oldPwdInput.trim() || !this.newPwdInput.trim() || !this.confirmPwdInput.trim()) {
+      this.errorMessage = 'All fields (Username, Old Password, New Password, Confirm Password) are required.';
       this.cdr.markForCheck();
       return;
     }
@@ -175,7 +193,7 @@ export class CommonLoginComponent implements OnInit {
       this.cdr.markForCheck();
       return;
     }
-    if (this.confirmPwdInput && this.newPwdInput !== this.confirmPwdInput) {
+    if (this.newPwdInput !== this.confirmPwdInput) {
       this.errorMessage = 'New password and confirm password do not match.';
       this.cdr.markForCheck();
       return;
@@ -252,8 +270,8 @@ export class CommonLoginComponent implements OnInit {
 
   // --- Scenario 1C: Complete reset using token/link ---
   submitResetUsingToken(): void {
-    if (!this.tokenInput.trim() || !this.tokenNewPwd.trim()) {
-      this.errorMessage = 'Reset token and new password are required.';
+    if (!this.tokenInput.trim() || !this.tokenNewPwd.trim() || !this.tokenConfirmPwd.trim()) {
+      this.errorMessage = 'Reset token, new password, and confirm password are required.';
       this.cdr.markForCheck();
       return;
     }
@@ -262,7 +280,7 @@ export class CommonLoginComponent implements OnInit {
       this.cdr.markForCheck();
       return;
     }
-    if (this.tokenConfirmPwd && this.tokenNewPwd !== this.tokenConfirmPwd) {
+    if (this.tokenNewPwd !== this.tokenConfirmPwd) {
       this.errorMessage = 'New password and confirm password do not match.';
       this.cdr.markForCheck();
       return;

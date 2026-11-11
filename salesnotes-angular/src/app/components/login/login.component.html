@@ -283,7 +283,7 @@
     <!-- VIEW 4: Request Reset Link on Email                               -->
     <!-- ================================================================= -->
     <div *ngIf="viewMode === 'request_email'" class="recovery-flow">
-      <div class="flow-header">
+      <div class="flow-header" *ngIf="!generatedToken">
         <h3>Send Password Reset Link on Email</h3>
         <p>Enter your registered username or email address below.</p>
       </div>
@@ -319,7 +319,9 @@
 
         <div class="simulated-link-box">
           <span class="box-title">Direct Reset Link:</span>
-          <code>{{ generatedResetUrl }}</code>
+          <a class="direct-link-url" (click)="goToTokenReset()" title="Click to open reset form with this token">
+            {{ generatedResetUrl }}
+          </a>
         </div>
 
         <button type="button" class="btn-submit mt-2" (click)="goToTokenReset()">
@@ -342,6 +344,21 @@
       </div>
 
       <form (ngSubmit)="submitResetUsingToken()" class="login-form">
+        <div class="account-pill-box" *ngIf="tokenUser">
+          <span class="pill-label">Resetting Password For:</span>
+          <span class="pill-value">{{ tokenUser }}</span>
+        </div>
+
+        <div class="form-group" *ngIf="!tokenUser">
+          <label>Username or Email Address (optional)</label>
+          <input
+            type="text"
+            [(ngModel)]="tokenUser"
+            name="tokenUser"
+            placeholder="e.g. sysadmin or user@company.com"
+          />
+        </div>
+
         <div class="form-group">
           <label>Reset Token *</label>
           <input

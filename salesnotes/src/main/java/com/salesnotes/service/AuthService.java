@@ -165,7 +165,12 @@ public class AuthService {
             throw new IllegalArgumentException("Password reset link/token is invalid or has expired. Please request a new link.");
         }
 
-        User user = userRepository.findByUsernameIgnoreCase(entry.username)
+        String username = (entry.username != null && !entry.username.isBlank())
+                ? entry.username
+                : (request.getUsernameOrEmail() != null ? request.getUsernameOrEmail().trim() : "");
+
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .or(() -> userRepository.findFirstByEmailIgnoreCase(username))
                 .orElseThrow(() -> new IllegalArgumentException("User for token not found."));
 
         if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {

@@ -7,7 +7,6 @@ public class ResetPasswordWithTokenDto {
     @NotBlank(message = "Reset token is required")
     private String token;
 
-    @NotBlank(message = "Username or email is required")
     private String usernameOrEmail;
 
     @NotBlank(message = "New password is required")

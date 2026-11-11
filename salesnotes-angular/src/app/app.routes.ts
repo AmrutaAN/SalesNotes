@@ -14,6 +14,8 @@ export const routes: Routes = [
   // Default application load page on startup is Login Page
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'reset-password', component: LoginComponent },
+  { path: 'forgot-password', component: LoginComponent },
 
   // Protected Application Routes (Protected via authGuard: entering system is login-only)
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
