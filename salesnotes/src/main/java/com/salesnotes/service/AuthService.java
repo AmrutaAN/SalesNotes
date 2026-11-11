@@ -69,7 +69,7 @@ public class AuthService {
 
         // 1. Locate user by username or email
         Optional<User> userOpt = userRepository.findByUsernameIgnoreCase(input)
-                .or(() -> userRepository.findByEmailIgnoreCase(input));
+                .or(() -> userRepository.findFirstByEmailIgnoreCase(input));
 
         if (userOpt.isEmpty()) {
             throw new BadCredentialsException("Username or email '" + input + "' not found.");
@@ -116,7 +116,7 @@ public class AuthService {
     public Map<String, Object> resetPasswordUsingOldPassword(VerifyOldPasswordRequest request) {
         String input = request.getUsernameOrEmail().trim();
         User user = userRepository.findByUsernameIgnoreCase(input)
-                .or(() -> userRepository.findByEmailIgnoreCase(input))
+                .or(() -> userRepository.findFirstByEmailIgnoreCase(input))
                 .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
@@ -139,7 +139,7 @@ public class AuthService {
     public Map<String, Object> requestPasswordResetLink(ForgotPasswordRequestDto request) {
         String input = request.getUsernameOrEmail().trim();
         User user = userRepository.findByUsernameIgnoreCase(input)
-                .or(() -> userRepository.findByEmailIgnoreCase(input))
+                .or(() -> userRepository.findFirstByEmailIgnoreCase(input))
                 .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
 
         // Generate 32-character secure reset token valid for 30 minutes

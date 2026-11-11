@@ -140,4 +140,48 @@ class RoleTests {
                         .header("Authorization", superUserToken))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @DisplayName("Should allow multiple users with the same email (non-unique email)")
+    void shouldAllowMultipleUsersWithSameEmail() throws Exception {
+        String sharedEmail = "shared_team_" + System.currentTimeMillis() + "@salesnotes.test";
+
+        // 1. Create first user with shared email
+        com.salesnotes.dto.UserRequest user1 = new com.salesnotes.dto.UserRequest();
+        user1.setUsername("user_a_" + System.currentTimeMillis());
+        user1.setFullname("User Alpha");
+        user1.setEmail(sharedEmail);
+        user1.setPassword("Pass@123");
+        user1.setRole(com.salesnotes.entity.UserRole.COMPANYEMPLOYEE);
+
+        MvcResult res1 = mockMvc.perform(post("/api/v1/users")
+                        .header("Authorization", superUserToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user1)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(sharedEmail))
+                .andReturn();
+        String id1 = objectMapper.readTree(res1.getResponse().getContentAsString()).get("id").asText();
+
+        // 2. Create second user with DIFFERENT username but SAME email
+        com.salesnotes.dto.UserRequest user2 = new com.salesnotes.dto.UserRequest();
+        user2.setUsername("user_b_" + System.currentTimeMillis());
+        user2.setFullname("User Beta");
+        user2.setEmail(sharedEmail);
+        user2.setPassword("Pass@456");
+        user2.setRole(com.salesnotes.entity.UserRole.COMPANYEMPLOYEE);
+
+        MvcResult res2 = mockMvc.perform(post("/api/v1/users")
+                        .header("Authorization", superUserToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user2)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(sharedEmail))
+                .andReturn();
+        String id2 = objectMapper.readTree(res2.getResponse().getContentAsString()).get("id").asText();
+
+        // Clean up
+        mockMvc.perform(delete("/api/v1/users/" + id1).header("Authorization", superUserToken)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/v1/users/" + id2).header("Authorization", superUserToken)).andExpect(status().isNoContent());
+    }
 }

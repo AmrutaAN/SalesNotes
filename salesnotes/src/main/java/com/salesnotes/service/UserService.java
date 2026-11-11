@@ -57,14 +57,11 @@ public class UserService {
         if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
             throw new IllegalArgumentException("Username already in use: " + request.getUsername());
         }
-        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            throw new IllegalArgumentException("Email already in use: " + request.getEmail());
-        }
 
         User user = new User(
                 request.getUsername().trim(),
                 request.getFullname().trim(),
-                request.getEmail().trim(),
+                request.getEmail() != null ? request.getEmail().trim() : "",
                 passwordEncoder.encode(request.getPassword().trim()),
                 request.getRole() != null ? request.getRole() : UserRole.COMPANYEMPLOYEE
         );
@@ -82,14 +79,12 @@ public class UserService {
                     userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
                 throw new IllegalArgumentException("Username already taken: " + request.getUsername());
             }
-            if (!existing.getEmail().equalsIgnoreCase(request.getEmail()) &&
-                    userRepository.existsByEmailIgnoreCase(request.getEmail())) {
-                throw new IllegalArgumentException("Email already taken: " + request.getEmail());
-            }
 
             existing.setUsername(request.getUsername().trim());
             existing.setFullname(request.getFullname().trim());
-            existing.setEmail(request.getEmail().trim());
+            if (request.getEmail() != null) {
+                existing.setEmail(request.getEmail().trim());
+            }
             if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
                 existing.setPassword(passwordEncoder.encode(request.getPassword()));
             }

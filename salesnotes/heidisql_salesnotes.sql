@@ -92,7 +92,7 @@ CREATE TABLE `users` (
   `updatedat` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_username` (`username`),
-  UNIQUE KEY `uk_users_email` (`email`),
+  INDEX `idx_users_email` (`email`),
   INDEX `idx_users_org` (`organisation_id`),
   INDEX `idx_users_role` (`role`, `organisation_id`),
   CONSTRAINT `fk_users_org` FOREIGN KEY (`organisation_id`) REFERENCES `organisations` (`id`) ON DELETE RESTRICT

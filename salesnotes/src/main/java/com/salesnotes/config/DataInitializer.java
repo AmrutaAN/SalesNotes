@@ -23,9 +23,25 @@ public class DataInitializer {
             CatalogueItemRepository catalogueRepo,
             ItemPriceTierRepository tierRepo,
             RoleRepository roleRepo,
-            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+            org.springframework.jdbc.core.JdbcTemplate jdbcTemplate
     ) {
         return args -> {
+            // Drop any legacy unique constraint on users.email if still present
+            try {
+                java.util.List<java.util.Map<String, Object>> emailIndexes = jdbcTemplate.queryForList(
+                    "SHOW INDEX FROM users WHERE Column_name = 'email' AND Non_unique = 0"
+                );
+                for (java.util.Map<String, Object> idx : emailIndexes) {
+                    String keyName = (String) idx.get("Key_name");
+                    if (keyName != null && !keyName.equalsIgnoreCase("PRIMARY")) {
+                        jdbcTemplate.execute("ALTER TABLE users DROP INDEX `" + keyName + "`");
+                        System.out.println("SalesNotes Data Initializer: Dropped unique index on users.email: " + keyName);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+
             // 0. Seed Default System Roles
             if (roleRepo.count() == 0) {
                 roleRepo.save(new Role("SuperUser", "Super User", "Platform Master Administrator with full access across all operations and organisations", true));

@@ -37,7 +37,7 @@ CREATE TABLE `users` (
   `updatedat` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_users_username` (`username`),
-  UNIQUE KEY `uk_users_email` (`email`)
+  KEY `idx_users_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================================
