@@ -11,11 +11,11 @@ import { authGuard } from '@common/guards/auth.guard';
 import { roleGuard } from '@common/guards/role.guard';
 
 export const routes: Routes = [
-  // Public Login Route
+  // Default application load page on startup is Login Page
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
   // Protected Application Routes (Protected via authGuard: entering system is login-only)
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'notes', component: NoteListComponent, canActivate: [authGuard] },
   { path: 'notes/new', component: NoteFormComponent, canActivate: [authGuard] },
@@ -37,6 +37,6 @@ export const routes: Routes = [
     data: { roles: ['SuperUser', 'Sysadmin'] }
   },
 
-  // Fallback
-  { path: '**', redirectTo: 'dashboard' }
+  // Fallback to login
+  { path: '**', redirectTo: 'login' }
 ];

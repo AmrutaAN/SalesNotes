@@ -18,11 +18,10 @@ export class CommonLoginComponent implements OnInit {
   returnUrl = '/dashboard';
 
   ngOnInit(): void {
-    // If already logged in, redirect to dashboard
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+    const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+    if (queryReturnUrl) {
+      this.returnUrl = queryReturnUrl;
     }
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
   }
 
   onSubmit(): void {

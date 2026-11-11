@@ -50,6 +50,13 @@ import { CommonLoginComponent } from '@common/components/common-login/common-log
 export class LoginIonicPage extends CommonLoginComponent {
   constructor() {
     super();
+    this.returnUrl = '/tabs/dashboard';
     addIcons({ lockClosedOutline, personOutline, logInOutline });
+  }
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+    this.returnUrl = queryReturnUrl || '/tabs/dashboard';
   }
 }
