@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -22,11 +22,13 @@ import {
   IonBadge,
   IonSpinner,
   IonButton,
+  IonButtons,
   IonIcon
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { statsChartOutline, cashOutline, alertCircleOutline, checkmarkCircleOutline, refreshOutline } from 'ionicons/icons';
+import { statsChartOutline, cashOutline, alertCircleOutline, checkmarkCircleOutline, refreshOutline, logOutOutline } from 'ionicons/icons';
 import { CommonDashboardComponent } from '@common/components/common-dashboard/common-dashboard.component';
+import { AuthService } from '@common/services/auth.service';
 
 @Component({
   selector: 'app-dashboard-ionic',
@@ -58,13 +60,20 @@ import { CommonDashboardComponent } from '@common/components/common-dashboard/co
     IonBadge,
     IonSpinner,
     IonButton,
+    IonButtons,
     IonIcon
   ]
 })
 export class DashboardIonicComponent extends CommonDashboardComponent {
+  private authService = inject(AuthService);
+
   constructor() {
     super();
-    addIcons({ statsChartOutline, cashOutline, alertCircleOutline, checkmarkCircleOutline, refreshOutline });
+    addIcons({ statsChartOutline, cashOutline, alertCircleOutline, checkmarkCircleOutline, refreshOutline, logOutOutline });
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
   handleRefresh(event: any) {

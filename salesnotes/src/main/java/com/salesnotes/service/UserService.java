@@ -51,6 +51,9 @@ public class UserService {
     }
 
     public UserResponse createUser(UserRequest request) {
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("Password is required for creating a new user");
+        }
         if (userRepository.existsByUsernameIgnoreCase(request.getUsername())) {
             throw new IllegalArgumentException("Username already in use: " + request.getUsername());
         }
@@ -62,7 +65,7 @@ public class UserService {
                 request.getUsername().trim(),
                 request.getFullname().trim(),
                 request.getEmail().trim(),
-                passwordEncoder.encode(request.getPassword()),
+                passwordEncoder.encode(request.getPassword().trim()),
                 request.getRole() != null ? request.getRole() : UserRole.COMPANYEMPLOYEE
         );
         if (request.getActive() != null) {
@@ -96,6 +99,17 @@ public class UserService {
             if (request.getActive() != null) {
                 existing.setActive(request.getActive());
             }
+            return UserResponse.fromEntity(userRepository.save(existing));
+        });
+    }
+
+    public Optional<UserResponse> assignRole(String id, String roleName) {
+        return userRepository.findById(id).map(existing -> {
+            UserRole newRole = UserRole.fromString(roleName);
+            if (newRole == null) {
+                throw new IllegalArgumentException("Invalid role specified: " + roleName);
+            }
+            existing.setRole(newRole);
             return UserResponse.fromEntity(userRepository.save(existing));
         });
     }

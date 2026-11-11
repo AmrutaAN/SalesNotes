@@ -1,9 +1,14 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>SalesNotes Mobile</ion-title>
-    <ion-button slot="end" fill="clear" color="light" (click)="loadSummary()">
-      <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-    </ion-button>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="loadSummary()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" color="light" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

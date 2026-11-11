@@ -21,12 +21,11 @@ spring:
       connection-timeout: 20000
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.MariaDBDialect
 
 app:
   environment: prod

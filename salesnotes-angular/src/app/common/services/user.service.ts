@@ -8,15 +8,15 @@ import { User, UserRequest, UserRole } from '../models/user.model';
 })
 export class UserService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = 'http://localhost:8080/api/v1/users';
 
-  getUsers(search?: string, role?: UserRole, active?: boolean): Observable<User[]> {
+  getUsers(search?: string, role?: string, active?: boolean): Observable<User[]> {
     let params = new HttpParams();
     if (search && search.trim()) {
       params = params.set('search', search.trim());
     }
-    if (role) {
-      params = params.set('role', role);
+    if (role && role.trim()) {
+      params = params.set('role', role.trim());
     }
     if (active !== undefined && active !== null) {
       params = params.set('active', active.toString());
@@ -24,7 +24,7 @@ export class UserService {
     return this.http.get<User[]>(this.apiUrl, { params });
   }
 
-  getUserById(id: number): Observable<User> {
+  getUserById(id: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
@@ -32,15 +32,19 @@ export class UserService {
     return this.http.post<User>(this.apiUrl, request);
   }
 
-  updateUser(id: number, request: UserRequest): Observable<User> {
+  updateUser(id: string, request: UserRequest): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/${id}`, request);
   }
 
-  updateStatus(id: number, active: boolean): Observable<User> {
+  assignRole(id: string, role: string): Observable<User> {
+    return this.http.patch<User>(`${this.apiUrl}/${id}/role`, { role });
+  }
+
+  updateStatus(id: string, active: boolean): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${id}/status`, { active });
   }
 
-  deleteUser(id: number): Observable<void> {
+  deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

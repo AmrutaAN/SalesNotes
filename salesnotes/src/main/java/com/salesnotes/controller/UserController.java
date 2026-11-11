@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<List<UserResponse>> getAllUsers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String role,
@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN') or #id == authentication.principal.id")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN') or #id == authentication.principal.id")
     public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
@@ -46,22 +46,34 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         UserResponse created = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> updateUser(@PathVariable String id, @Valid @RequestBody UserRequest request) {
         return userService.updateUser(id, request)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN')")
+    public ResponseEntity<UserResponse> assignRole(@PathVariable String id, @RequestBody Map<String, String> body) {
+        String role = body.get("role");
+        if (role == null || role.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return userService.assignRole(id, role.trim())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> updateStatus(@PathVariable String id, @RequestBody Map<String, Boolean> body) {
         Boolean active = body.get("active");
         if (active == null) {
@@ -73,7 +85,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SYSADMIN')")
+    @PreAuthorize("hasAnyRole('SUPERUSER', 'SYSADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         if (userService.deleteUser(id)) {
             return ResponseEntity.noContent().build();

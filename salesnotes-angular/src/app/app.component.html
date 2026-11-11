@@ -1,4 +1,5 @@
-<div class="app-container">
+<!-- Authenticated Layout -->
+<div *ngIf="isLoggedIn() && !isLoginPage()" class="app-container">
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
@@ -19,10 +20,21 @@
         <a routerLink="/customers" routerLinkActive="active" class="nav-item">
           👥 Customers
         </a>
+        <a *ngIf="canAccessUsers()" routerLink="/users" routerLinkActive="active" class="nav-item">
+          👤 Users
+        </a>
+        <a *ngIf="canAccessRoles()" routerLink="/roles" routerLinkActive="active" class="nav-item">
+          🛡️ Roles
+        </a>
       </nav>
 
-      <div class="header-cta">
+      <div class="header-user-actions">
+        <div class="user-badge-info" *ngIf="getCurrentUser() as user">
+          <span class="user-name">{{ user.fullname || user.username }}</span>
+          <span class="role-pill" [attr.data-role]="user.role">{{ user.role }}</span>
+        </div>
         <a routerLink="/notes/new" class="btn btn-primary btn-sm">+ New Note</a>
+        <button class="btn btn-outline btn-sm btn-logout" (click)="onLogout()">Logout</button>
       </div>
     </div>
   </header>
@@ -34,4 +46,9 @@
   <footer class="app-footer">
     <p>SalesNotes Platform &bull; Powered by Angular + Ionic + Spring Boot &bull; Common Component Pattern</p>
   </footer>
+</div>
+
+<!-- Unauthenticated / Login View -->
+<div *ngIf="!isLoggedIn() || isLoginPage()">
+  <router-outlet></router-outlet>
 </div>

@@ -30,6 +30,7 @@ DROP TABLE IF EXISTS `tags`;
 DROP TABLE IF EXISTS `client_notes`;
 DROP TABLE IF EXISTS `clients`;
 DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `roles`;
 DROP TABLE IF EXISTS `organisations`;
 -- Legacy compatibility cleanup
 DROP TABLE IF EXISTS `sales_notes`;
@@ -54,8 +55,23 @@ CREATE TABLE `organisations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================================
--- 2. Table: users (Application Users with Roles: SYSADMIN, companyadmin, companyemployee)
--- Note: Contains all requested fields: id, username, fullname, email, password, role,
+-- 1B. Table: roles (Dynamic Roles with Add/Edit capability)
+-- ==============================================================================
+CREATE TABLE `roles` (
+  `id` CHAR(36) NOT NULL,
+  `code` VARCHAR(50) NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT NULL,
+  `is_system` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_roles_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==============================================================================
+-- 2. Table: users (Application Users with Roles: SuperUser, Sysadmin, companyadmin, companyemployee)
+-- Note: User 'sysadmin' assigned role 'SuperUser'. Contains all requested fields: id, username, fullname, email, password, role,
 --       active, createdat, updatedat, plus organization reference.
 -- ==============================================================================
 CREATE TABLE `users` (
@@ -392,9 +408,16 @@ CREATE TABLE `voice_transcriptions` (
 INSERT INTO `organisations` (`id`, `name`, `slug`, `timezone`, `currency_code`, `is_active`)
 VALUES ('11111111-1111-1111-1111-111111111111', 'Acme Global Corporation', 'acme-global', 'Asia/Kolkata', 'INR', 1);
 
--- 2. Seed Users (SYSADMIN, companyadmin, companyemployee)
+-- 1B. Seed Default System Roles (SuperUser, Sysadmin, companyadmin, companyemployee)
+INSERT INTO `roles` (`id`, `code`, `name`, `description`, `is_system`) VALUES
+('00000000-0000-0000-0000-000000000001', 'SuperUser', 'Super User', 'Platform Master Administrator with full access across all operations and organisations', 1),
+('00000000-0000-0000-0000-000000000002', 'Sysadmin', 'System Administrator', 'System configuration, platform maintenance, and tenant administration', 1),
+('00000000-0000-0000-0000-000000000003', 'companyadmin', 'Company Administrator', 'Company-level user management, catalogue pricing, and pointer tag configuration', 1),
+('00000000-0000-0000-0000-000000000004', 'companyemployee', 'Company Employee', 'Field sales rep managing client interactions, voice notes, and clipboard exports', 1);
+
+-- 2. Seed Users (sysadmin as SuperUser, companyadmin, companyemployee)
 INSERT INTO `users` (`id`, `organisation_id`, `username`, `fullname`, `email`, `password`, `role`, `active`) VALUES
-('22222222-2222-2222-2222-222222222201', '11111111-1111-1111-1111-111111111111', 'sysadmin', 'System Administrator', 'sysadmin@salesnotes.local', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'SYSADMIN', 1),
+('22222222-2222-2222-2222-222222222201', '11111111-1111-1111-1111-111111111111', 'sysadmin', 'System SuperUser Administrator', 'sysadmin@salesnotes.local', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'SuperUser', 1),
 ('22222222-2222-2222-2222-222222222202', '11111111-1111-1111-1111-111111111111', 'companyadmin', 'Acme Company Admin', 'admin@acmeglobal.com', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'companyadmin', 1),
 ('22222222-2222-2222-2222-222222222203', '11111111-1111-1111-1111-111111111111', 'companyemployee', 'Rahul Sharma (Field Rep)', 'rahul@acmeglobal.com', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'companyemployee', 1);
 

@@ -1,0 +1,83 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="brand-header">
+      <div class="brand-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <h2>SalesNotes</h2>
+      <p class="subtitle">Client Interaction & Note Taking Intelligence</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="error-banner">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-icon-wrapper">
+          <input
+            id="username"
+            type="text"
+            [(ngModel)]="username"
+            name="username"
+            required
+            autocomplete="username"
+            placeholder="e.g. sysadmin, companyadmin"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-icon-wrapper">
+          <input
+            id="password"
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Enter your password"
+          />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="loading">
+        <span *ngIf="!loading">Sign In to SalesNotes</span>
+        <span *ngIf="loading" class="spinner">Verifying credentials...</span>
+      </button>
+    </form>
+
+    <!-- Quick Role Presets for Easy Demo/Testing -->
+    <div class="presets-section">
+      <div class="presets-label">Quick Sign-In by Role:</div>
+      <div class="preset-chips">
+        <button type="button" class="chip chip-superuser" (click)="selectPreset('sysadmin', 'SysAdmin@123')">
+          <span class="role-badge">SuperUser</span>
+          <span class="chip-text">sysadmin</span>
+        </button>
+        <button type="button" class="chip chip-admin" (click)="selectPreset('companyadmin', 'Admin@123')">
+          <span class="role-badge">Admin</span>
+          <span class="chip-text">companyadmin</span>
+        </button>
+        <button type="button" class="chip chip-employee" (click)="selectPreset('companyemployee', 'User@123')">
+          <span class="role-badge">Sales Rep</span>
+          <span class="chip-text">companyemployee</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

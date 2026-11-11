@@ -6,8 +6,9 @@ import {
   withPreloading,
   PreloadAllModules,
 } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
+import { jwtInterceptor } from '@common/interceptors/jwt.interceptor';
 
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
@@ -16,7 +17,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([jwtInterceptor])),
     provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding()),
   ],
 });

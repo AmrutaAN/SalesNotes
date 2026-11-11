@@ -22,9 +22,19 @@ public class DataInitializer {
             TagRepository tagRepo,
             CatalogueItemRepository catalogueRepo,
             ItemPriceTierRepository tierRepo,
+            RoleRepository roleRepo,
             org.springframework.security.crypto.password.PasswordEncoder passwordEncoder
     ) {
         return args -> {
+            // 0. Seed Default System Roles
+            if (roleRepo.count() == 0) {
+                roleRepo.save(new Role("SuperUser", "Super User", "Platform Master Administrator with full access across all operations and organisations", true));
+                roleRepo.save(new Role("Sysadmin", "System Administrator", "System configuration, platform maintenance, and tenant administration", true));
+                roleRepo.save(new Role("companyadmin", "Company Administrator", "Company-level user management, catalogue pricing, and pointer tag configuration", true));
+                roleRepo.save(new Role("companyemployee", "Company Employee", "Field sales rep managing client interactions, voice notes, and clipboard exports", true));
+                System.out.println("SalesNotes Data Initializer: System roles seeded (SuperUser, Sysadmin, companyadmin, companyemployee)!");
+            }
+
             // 1. Seed Default Organisation
             Organisation defaultOrg = orgRepo.findBySlug("acme-global").orElseGet(() -> {
                 Organisation org = new Organisation("Acme Global Corporation", "acme-global");
@@ -33,14 +43,14 @@ public class DataInitializer {
                 return orgRepo.save(org);
             });
 
-            // 2. Seed Users if not present, or synchronize password hashes if already imported via HeidiSQL
+            // 2. Seed Users if not present, or synchronize role & password hashes if already imported via HeidiSQL
             String sysadminPass = passwordEncoder.encode("SysAdmin@123");
             String adminPass = passwordEncoder.encode("Admin@123");
             String userPass = passwordEncoder.encode("User@123");
 
             if (userRepo.count() == 0) {
-                // SYSADMIN
-                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", sysadminPass, UserRole.SYSADMIN);
+                // User 'sysadmin' assigned role SuperUser as requested
+                User sysadmin = new User("sysadmin", "System SuperUser Administrator", "admin@salesnotes.io", sysadminPass, UserRole.SUPERUSER);
                 sysadmin.setOrganisation(defaultOrg);
                 sysadmin.setActive(true);
                 userRepo.save(sysadmin);
@@ -57,13 +67,15 @@ public class DataInitializer {
                 companyEmployee.setActive(true);
                 userRepo.save(companyEmployee);
 
-                System.out.println("SalesNotes Data Initializer: Default users seeded (SYSADMIN, companyadmin, companyemployee)!");
+                System.out.println("SalesNotes Data Initializer: Default users seeded (sysadmin as SuperUser, companyadmin, companyemployee)!");
             } else {
+                // Ensure user 'sysadmin' specifically has role as SuperUser
                 userRepo.findByUsernameIgnoreCase("sysadmin").ifPresent(u -> {
+                    u.setRole(UserRole.SUPERUSER);
                     if (!passwordEncoder.matches("SysAdmin@123", u.getPassword())) {
                         u.setPassword(sysadminPass);
-                        userRepo.save(u);
                     }
+                    userRepo.save(u);
                 });
                 userRepo.findByUsernameIgnoreCase("companyadmin").ifPresent(u -> {
                     if (!passwordEncoder.matches("Admin@123", u.getPassword())) {

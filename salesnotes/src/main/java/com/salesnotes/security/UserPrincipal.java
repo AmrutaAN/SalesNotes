@@ -30,9 +30,19 @@ public class UserPrincipal implements UserDetails {
         this.role = user.getRole();
         this.organisationId = user.getOrganisation() != null ? user.getOrganisation().getId() : null;
         this.active = Boolean.TRUE.equals(user.getActive()) && !Boolean.TRUE.equals(user.getDeleted());
-        this.authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + (user.getRole() != null ? user.getRole().name() : "COMPANYEMPLOYEE"))
-        );
+        java.util.List<GrantedAuthority> auths = new java.util.ArrayList<>();
+        if (user.getRole() != null) {
+            auths.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+            if (user.getRole() == UserRole.SUPERUSER) {
+                auths.add(new SimpleGrantedAuthority("ROLE_SYSADMIN"));
+                auths.add(new SimpleGrantedAuthority("ROLE_COMPANYADMIN"));
+            } else if (user.getRole() == UserRole.SYSADMIN) {
+                auths.add(new SimpleGrantedAuthority("ROLE_COMPANYADMIN"));
+            }
+        } else {
+            auths.add(new SimpleGrantedAuthority("ROLE_COMPANYEMPLOYEE"));
+        }
+        this.authorities = Collections.unmodifiableList(auths);
     }
 
     public String getId() {

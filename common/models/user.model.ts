@@ -1,11 +1,13 @@
-export type UserRole = 'SYSADMIN' | 'companyadmin' | 'companyemployee';
+export type UserRole = 'SuperUser' | 'Sysadmin' | 'companyadmin' | 'companyemployee' | string;
 
 export interface User {
-  id?: number;
+  id: string;
+  organisationId?: string;
+  organisationName?: string;
   username: string;
   fullname: string;
   email: string;
-  password?: string;
+  phone?: string;
   role: UserRole;
   active: boolean;
   createdat?: string;
