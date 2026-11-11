@@ -401,6 +401,54 @@ CREATE TABLE `voice_transcriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==============================================================================
+-- 16. Table: customers (Customer Profiles for Sales Notes)
+-- ==============================================================================
+CREATE TABLE `customers` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `company` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NULL,
+  `phone` VARCHAR(50) NULL,
+  `industry` VARCHAR(100) NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==============================================================================
+-- 17. Table: note_categories (Categories for Sales Notes)
+-- ==============================================================================
+CREATE TABLE `note_categories` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `color` VARCHAR(50) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_categories_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==============================================================================
+-- 18. Table: sales_notes (Sales Notes linked to Customers & Categories)
+-- ==============================================================================
+CREATE TABLE `sales_notes` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NULL,
+  `customer_id` BIGINT NOT NULL,
+  `category_id` BIGINT NULL,
+  `deal_amount` DOUBLE NULL,
+  `priority` VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+  `status` VARCHAR(30) NOT NULL DEFAULT 'OPEN',
+  `follow_up_date` DATE NULL,
+  `tags` VARCHAR(255) NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_notes_customer` (`customer_id`),
+  KEY `fk_notes_category` (`category_id`),
+  CONSTRAINT `fk_notes_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_notes_category` FOREIGN KEY (`category_id`) REFERENCES `note_categories` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==============================================================================
 -- SEED DATA (Organizations, Users, Tags, Clients, Catalogue & Sample Notes)
 -- ==============================================================================
 
