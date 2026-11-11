@@ -416,10 +416,11 @@ INSERT INTO `roles` (`id`, `code`, `name`, `description`, `is_system`) VALUES
 ('00000000-0000-0000-0000-000000000004', 'companyemployee', 'Company Employee', 'Field sales rep managing client interactions, voice notes, and clipboard exports', 1);
 
 -- 2. Seed Users (sysadmin as SuperUser, companyadmin, companyemployee)
+-- Passwords: sysadmin -> SysAdmin@123, companyadmin -> Admin@123, companyemployee -> User@123
 INSERT INTO `users` (`id`, `organisation_id`, `username`, `fullname`, `email`, `password`, `role`, `active`) VALUES
-('22222222-2222-2222-2222-222222222201', '11111111-1111-1111-1111-111111111111', 'sysadmin', 'System SuperUser Administrator', 'sysadmin@salesnotes.local', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'SuperUser', 1),
-('22222222-2222-2222-2222-222222222202', '11111111-1111-1111-1111-111111111111', 'companyadmin', 'Acme Company Admin', 'admin@acmeglobal.com', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'companyadmin', 1),
-('22222222-2222-2222-2222-222222222203', '11111111-1111-1111-1111-111111111111', 'companyemployee', 'Rahul Sharma (Field Rep)', 'rahul@acmeglobal.com', '$2a$10$wE9l1l.n2YfVz2Y9iN8vK.cT.1n7Z4t3n1Y5J3z7t9r1w2e3r4t5y', 'companyemployee', 1);
+('22222222-2222-2222-2222-222222222201', '11111111-1111-1111-1111-111111111111', 'sysadmin', 'System SuperUser Administrator', 'sysadmin@salesnotes.local', '$2a$10$e/xodzOew3JuhJFZI7PlYOnFChl2KhU9DbCC4qYJ0QTAew643rxcW', 'SuperUser', 1),
+('22222222-2222-2222-2222-222222222202', '11111111-1111-1111-1111-111111111111', 'companyadmin', 'Acme Company Admin', 'admin@acmeglobal.com', '$2a$10$BGYij5qCcz1eibPRbTXMSOJJtxPmkEDTmKYToi6TFyY/fOYyAaSpK', 'companyadmin', 1),
+('22222222-2222-2222-2222-222222222203', '11111111-1111-1111-1111-111111111111', 'companyemployee', 'Rahul Sharma (Field Rep)', 'rahul@acmeglobal.com', '$2a$10$kCaOz.G3DuKJgenm0FqaZu4i0JJAlYHVzT6Pi8CPFoElxdeirdF3C', 'companyemployee', 1);
 
 -- 3. Seed Default System Pointer Tags
 INSERT INTO `tags` (`id`, `organisation_id`, `code`, `label`, `color_hex`, `description`, `is_system`, `is_active`, `sort_order`) VALUES
