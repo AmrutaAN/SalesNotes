@@ -185,4 +185,75 @@ class AuthTests {
         mockMvc.perform(get("/api/v1/auth/me"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Autowired
+    private com.salesnotes.repository.UserRepository userRepository;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Test
+    @DisplayName("HybridPasswordEncoder: if encrypted decrypt/verify, else verify as text pattern")
+    void shouldVerifyEncryptedOrPlainTextPasswords() {
+        com.salesnotes.security.HybridPasswordEncoder hybrid = (com.salesnotes.security.HybridPasswordEncoder) passwordEncoder;
+
+        // 1. BCrypt encrypted
+        String bcryptHash = hybrid.encode("Secret@123");
+        assertThat(hybrid.isEncrypted(bcryptHash)).isTrue();
+        assertThat(hybrid.matches("Secret@123", bcryptHash)).isTrue();
+        assertThat(hybrid.matches("WrongPass@123", bcryptHash)).isFalse();
+
+        // 2. Plain text pattern
+        String plainText = "MyPlainPassword@2026";
+        assertThat(hybrid.isEncrypted(plainText)).isFalse();
+        assertThat(hybrid.matches("MyPlainPassword@2026", plainText)).isTrue();
+        assertThat(hybrid.matches("WrongPass@2026", plainText)).isFalse();
+
+        // 3. AES encrypted
+        String aesEncrypted = hybrid.encryptAes("AesSecret@456");
+        assertThat(hybrid.isEncrypted(aesEncrypted)).isTrue();
+        assertThat(hybrid.matches("AesSecret@456", aesEncrypted)).isTrue();
+        assertThat(hybrid.matches("WrongAes@456", aesEncrypted)).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should successfully authenticate a user whose password in database is plain text")
+    void shouldAuthenticateUserWithPlainTextPassword() throws Exception {
+        // Create a user directly with plain text unencrypted password
+        String testUsername = "plainuser_" + System.currentTimeMillis();
+        com.salesnotes.entity.Organisation org = userRepository.findByUsernameIgnoreCase("companyadmin")
+                .map(com.salesnotes.entity.User::getOrganisation)
+                .orElse(null);
+
+        com.salesnotes.entity.User plainUser = new com.salesnotes.entity.User(
+                testUsername,
+                "Plain Text Password User",
+                testUsername + "@salesnotes.test",
+                "PlainText12345", // unencrypted plain text pattern
+                com.salesnotes.entity.UserRole.COMPANYEMPLOYEE
+        );
+        plainUser.setOrganisation(org);
+        userRepository.save(plainUser);
+
+        try {
+            // Attempt login with the plain text password
+            LoginRequest req = new LoginRequest(testUsername, "PlainText12345");
+
+            mockMvc.perform(post("/api/v1/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                    .andExpect(jsonPath("$.user.username").value(testUsername));
+
+            // Attempt login with wrong password -> should be rejected
+            LoginRequest wrongReq = new LoginRequest(testUsername, "WrongPassword@123");
+            mockMvc.perform(post("/api/v1/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(wrongReq)))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            userRepository.findByUsernameIgnoreCase(testUsername).ifPresent(userRepository::delete);
+        }
+    }
 }

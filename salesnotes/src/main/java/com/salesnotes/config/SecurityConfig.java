@@ -1,6 +1,7 @@
 package com.salesnotes.config;
 
 import com.salesnotes.security.CustomUserDetailsService;
+import com.salesnotes.security.HybridPasswordEncoder;
 import com.salesnotes.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,6 +82,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new HybridPasswordEncoder();
     }
 }
