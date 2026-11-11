@@ -17,9 +17,14 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserResponse> getAllUsers(String search, UserRole role, Boolean active) {
@@ -57,7 +62,7 @@ public class UserService {
                 request.getUsername().trim(),
                 request.getFullname().trim(),
                 request.getEmail().trim(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 request.getRole() != null ? request.getRole() : UserRole.COMPANYEMPLOYEE
         );
         if (request.getActive() != null) {
@@ -83,7 +88,7 @@ public class UserService {
             existing.setFullname(request.getFullname().trim());
             existing.setEmail(request.getEmail().trim());
             if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
-                existing.setPassword(request.getPassword());
+                existing.setPassword(passwordEncoder.encode(request.getPassword()));
             }
             if (request.getRole() != null) {
                 existing.setRole(request.getRole());

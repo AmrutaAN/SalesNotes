@@ -7,13 +7,14 @@ import com.salesnotes.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping({"/api/v1/users", "/api/users"})
 public class UserController {
 
     private final UserService userService;
@@ -23,6 +24,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<List<UserResponse>> getAllUsers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String role,
@@ -36,6 +38,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN') or #id == authentication.principal.id")
     public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
@@ -43,12 +46,14 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         UserResponse created = userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> updateUser(@PathVariable String id, @Valid @RequestBody UserRequest request) {
         return userService.updateUser(id, request)
                 .map(ResponseEntity::ok)
@@ -56,6 +61,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SYSADMIN', 'COMPANYADMIN')")
     public ResponseEntity<UserResponse> updateStatus(@PathVariable String id, @RequestBody Map<String, Boolean> body) {
         Boolean active = body.get("active");
         if (active == null) {
@@ -67,6 +73,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SYSADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         if (userService.deleteUser(id)) {
             return ResponseEntity.noContent().build();

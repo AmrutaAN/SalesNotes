@@ -17,8 +17,7 @@ public class SalesNote {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.EAGER)

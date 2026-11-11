@@ -23,7 +23,7 @@ public interface SalesNoteRepository extends JpaRepository<SalesNote, Long> {
 
     @Query("SELECT n FROM SalesNote n WHERE " +
            "(:search IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(n.content) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(CAST(n.content AS string)) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(n.customer.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(n.customer.company) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(n.tags) LIKE LOWER(CONCAT('%', :search, '%'))) " +

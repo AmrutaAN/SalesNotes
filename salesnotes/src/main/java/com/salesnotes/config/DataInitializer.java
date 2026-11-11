@@ -21,7 +21,8 @@ public class DataInitializer {
             OrganisationRepository orgRepo,
             TagRepository tagRepo,
             CatalogueItemRepository catalogueRepo,
-            ItemPriceTierRepository tierRepo
+            ItemPriceTierRepository tierRepo,
+            org.springframework.security.crypto.password.PasswordEncoder passwordEncoder
     ) {
         return args -> {
             // 1. Seed Default Organisation
@@ -34,20 +35,23 @@ public class DataInitializer {
 
             // 2. Seed Users if not present
             if (userRepo.count() == 0) {
+                String adminPass = passwordEncoder.encode("Admin@123");
+                String userPass = passwordEncoder.encode("User@123");
+
                 // SYSADMIN
-                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", "Admin@123", UserRole.SYSADMIN);
+                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", adminPass, UserRole.SYSADMIN);
                 sysadmin.setOrganisation(defaultOrg);
                 sysadmin.setActive(true);
                 userRepo.save(sysadmin);
 
                 // companyadmin
-                User companyAdmin = new User("companyadmin", "Alice Johnson (Company Admin)", "alice@acmecloud.com", "Admin@123", UserRole.COMPANYADMIN);
+                User companyAdmin = new User("companyadmin", "Alice Johnson (Company Admin)", "alice@acmecloud.com", adminPass, UserRole.COMPANYADMIN);
                 companyAdmin.setOrganisation(defaultOrg);
                 companyAdmin.setActive(true);
                 userRepo.save(companyAdmin);
 
                 // companyemployee
-                User companyEmployee = new User("companyemployee", "Rahul Sharma (Field Rep)", "rahul@acmecloud.com", "User@123", UserRole.COMPANYEMPLOYEE);
+                User companyEmployee = new User("companyemployee", "Rahul Sharma (Field Rep)", "rahul@acmecloud.com", userPass, UserRole.COMPANYEMPLOYEE);
                 companyEmployee.setOrganisation(defaultOrg);
                 companyEmployee.setActive(true);
                 userRepo.save(companyEmployee);
