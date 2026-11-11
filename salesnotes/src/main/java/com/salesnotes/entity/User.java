@@ -37,7 +37,7 @@ public class User {
     private String password;
 
     @NotNull(message = "Role is required")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = UserRoleConverter.class)
     @Column(nullable = false, length = 50)
     private UserRole role = UserRole.COMPANYEMPLOYEE;
 

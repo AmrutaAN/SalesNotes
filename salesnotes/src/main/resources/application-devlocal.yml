@@ -1,22 +1,22 @@
 # ==============================================================================
-# DEVLOCAL Profile: Local System Database
-# Connects to your local system database
+# DEVLOCAL Profile: Local MariaDB Database (configured via HeidiSQL)
+# Settings match HeidiSQL: Host 127.0.0.1, Port 3306, Database salesnotes, User root
 # ==============================================================================
 server:
   port: 8080
 
 spring:
   datasource:
-    # Local System Database:
-    # Defaults to local system database file (can be overridden with local MySQL or local Postgres)
-    url: ${LOCAL_DB_URL:jdbc:h2:file:./data/salesnotes_local;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
-    driver-class-name: ${LOCAL_DB_DRIVER:org.h2.Driver}
-    username: ${LOCAL_DB_USERNAME:sa}
-    password: ${LOCAL_DB_PASSWORD:}
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: ${LOCAL_DB_URL:jdbc:mariadb://127.0.0.1:3306/salesnotes?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC}
+    driver-class-name: ${LOCAL_DB_DRIVER:org.mariadb.jdbc.Driver}
+    username: ${LOCAL_DB_USERNAME:root}
+    password: ${LOCAL_DB_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 3
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,7 +24,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
 
 app:
   environment: devlocal
-  database-type: "Local System Database"
+  database-type: "Local MariaDB Database (HeidiSQL: 127.0.0.1:3306/salesnotes)"

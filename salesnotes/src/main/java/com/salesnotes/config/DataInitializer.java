@@ -33,13 +33,14 @@ public class DataInitializer {
                 return orgRepo.save(org);
             });
 
-            // 2. Seed Users if not present
-            if (userRepo.count() == 0) {
-                String adminPass = passwordEncoder.encode("Admin@123");
-                String userPass = passwordEncoder.encode("User@123");
+            // 2. Seed Users if not present, or synchronize password hashes if already imported via HeidiSQL
+            String sysadminPass = passwordEncoder.encode("SysAdmin@123");
+            String adminPass = passwordEncoder.encode("Admin@123");
+            String userPass = passwordEncoder.encode("User@123");
 
+            if (userRepo.count() == 0) {
                 // SYSADMIN
-                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", adminPass, UserRole.SYSADMIN);
+                User sysadmin = new User("sysadmin", "System Administrator", "admin@salesnotes.io", sysadminPass, UserRole.SYSADMIN);
                 sysadmin.setOrganisation(defaultOrg);
                 sysadmin.setActive(true);
                 userRepo.save(sysadmin);
@@ -57,6 +58,25 @@ public class DataInitializer {
                 userRepo.save(companyEmployee);
 
                 System.out.println("SalesNotes Data Initializer: Default users seeded (SYSADMIN, companyadmin, companyemployee)!");
+            } else {
+                userRepo.findByUsernameIgnoreCase("sysadmin").ifPresent(u -> {
+                    if (!passwordEncoder.matches("SysAdmin@123", u.getPassword())) {
+                        u.setPassword(sysadminPass);
+                        userRepo.save(u);
+                    }
+                });
+                userRepo.findByUsernameIgnoreCase("companyadmin").ifPresent(u -> {
+                    if (!passwordEncoder.matches("Admin@123", u.getPassword())) {
+                        u.setPassword(adminPass);
+                        userRepo.save(u);
+                    }
+                });
+                userRepo.findByUsernameIgnoreCase("companyemployee").ifPresent(u -> {
+                    if (!passwordEncoder.matches("User@123", u.getPassword())) {
+                        u.setPassword(userPass);
+                        userRepo.save(u);
+                    }
+                });
             }
 
             // 3. Seed Default Pointer Tags
