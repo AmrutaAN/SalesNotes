@@ -1,9 +1,11 @@
 package com.salesnotes.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 
 public class ChangePasswordRequest {
 
+    @JsonAlias({"currentPassword"})
     @NotBlank(message = "Current password is required")
     private String oldPassword;
 

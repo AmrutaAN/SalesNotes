@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
@@ -16,6 +16,7 @@ export class AppComponent {
   title = 'SalesNotes - Web App';
   protected authService = inject(AuthService);
   protected router = inject(Router);
+  protected cdr = inject(ChangeDetectorRef);
 
   currentUrl = signal<string>(window.location.pathname);
 
@@ -73,34 +74,41 @@ export class AppComponent {
     this.changePwdError = null;
     this.changePwdSuccess = null;
     this.showChangePasswordModal = true;
+    this.cdr.markForCheck();
   }
 
   closeChangePasswordModal(): void {
     this.showChangePasswordModal = false;
+    this.cdr.markForCheck();
   }
 
   submitChangePassword(): void {
     if (!this.changePwdForm.oldPassword.trim() || !this.changePwdForm.newPassword.trim() || !this.changePwdForm.confirmPassword.trim()) {
       this.changePwdError = 'All fields are required.';
+      this.cdr.markForCheck();
       return;
     }
     if (this.changePwdForm.newPassword.length < 6) {
       this.changePwdError = 'New password must be at least 6 characters.';
+      this.cdr.markForCheck();
       return;
     }
     if (this.changePwdForm.newPassword !== this.changePwdForm.confirmPassword) {
       this.changePwdError = 'New password and confirm password do not match.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.changePwdLoading = true;
     this.changePwdError = null;
     this.changePwdSuccess = null;
+    this.cdr.markForCheck();
 
     this.authService.changePassword(this.changePwdForm).subscribe({
       next: (res) => {
         this.changePwdLoading = false;
         this.changePwdSuccess = res.message || 'Password changed successfully!';
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.closeChangePasswordModal();
         }, 1500);
@@ -108,6 +116,7 @@ export class AppComponent {
       error: (err) => {
         this.changePwdLoading = false;
         this.changePwdError = err?.error?.message || 'Failed to change password. Please verify your current password.';
+        this.cdr.markForCheck();
       }
     });
   }

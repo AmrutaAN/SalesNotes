@@ -31,7 +31,12 @@ export class AuthService {
   constructor() {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+    const payload = {
+      username: credentials.username || credentials.usernameOrEmail,
+      usernameOrEmail: credentials.usernameOrEmail || credentials.username,
+      password: credentials.password
+    };
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, payload).pipe(
       tap(res => {
         if (res && res.accessToken) {
           localStorage.setItem(this.TOKEN_KEY, res.accessToken);
