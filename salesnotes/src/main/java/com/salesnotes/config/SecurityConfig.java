@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public authentication endpoints (v1 and root)
                         .requestMatchers("/api/v1/auth/**", "/api/auth/**").permitAll()
+                        // Public audio streaming for inline media players
+                        .requestMatchers("/api/v1/audio/stream/**", "/api/audio/stream/**").permitAll()
                         // Public developer & diagnostic endpoints
                         .requestMatchers("/h2-console/**", "/error").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
