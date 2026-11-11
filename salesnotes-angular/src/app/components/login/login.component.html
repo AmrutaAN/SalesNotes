@@ -14,20 +14,42 @@
       <p class="subtitle">Client Interaction & Note Taking Intelligence</p>
     </div>
 
-    <!-- Error Alert -->
-    <div *ngIf="errorMessage" class="error-banner">
+    <!-- Success Alert -->
+    <div *ngIf="successNotice" class="alert-banner alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ successNotice }}</span>
+    </div>
+
+    <!-- Error Alert with Wrong Password Prompting -->
+    <div *ngIf="errorMessage" class="alert-banner alert-danger">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="12" y1="8" x2="12" y2="12"></line>
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
       </svg>
-      <span>{{ errorMessage }}</span>
+      <div class="error-content">
+        <span>{{ errorMessage }}</span>
+        <button
+          *ngIf="viewMode === 'login' && errorMessage.toLowerCase().includes('wrong password')"
+          type="button"
+          class="btn-inline-link"
+          (click)="setMode('forgot_options')"
+        >
+          Reset your password now &rarr;
+        </button>
+      </div>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="login-form">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <div class="input-icon-wrapper">
+    <!-- ================================================================= -->
+    <!-- VIEW 1: Standard Login Form                                       -->
+    <!-- ================================================================= -->
+    <div *ngIf="viewMode === 'login'">
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="username">Username or Email</label>
           <input
             id="username"
             type="text"
@@ -38,11 +60,14 @@
             placeholder="e.g. sysadmin, companyadmin"
           />
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-icon-wrapper">
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <button type="button" class="forgot-link" (click)="setMode('forgot_options')">
+              Forgot Password?
+            </button>
+          </div>
           <input
             id="password"
             type="password"
@@ -53,31 +78,236 @@
             placeholder="Enter your password"
           />
         </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span *ngIf="!loading">Sign In to SalesNotes</span>
+          <span *ngIf="loading" class="spinner">Verifying credentials...</span>
+        </button>
+      </form>
+
+      <!-- Quick Role Presets for Easy Demo/Testing -->
+      <div class="presets-section">
+        <div class="presets-label">Quick Sign-In by Role:</div>
+        <div class="preset-chips">
+          <button type="button" class="chip chip-superuser" (click)="selectPreset('sysadmin', 'SysAdmin@123')">
+            <span class="role-badge">SuperUser</span>
+            <span class="chip-text">sysadmin</span>
+          </button>
+          <button type="button" class="chip chip-admin" (click)="selectPreset('companyadmin', 'Admin@123')">
+            <span class="role-badge">Admin</span>
+            <span class="chip-text">companyadmin</span>
+          </button>
+          <button type="button" class="chip chip-employee" (click)="selectPreset('companyemployee', 'User@123')">
+            <span class="role-badge">Sales Rep</span>
+            <span class="chip-text">companyemployee</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 2: Forgot Password Options (Method Selection)                -->
+    <!-- ================================================================= -->
+    <div *ngIf="viewMode === 'forgot_options'" class="recovery-flow">
+      <div class="flow-header">
+        <h3>Forgot Password Recovery</h3>
+        <p>Select your preferred method to reset your password:</p>
       </div>
 
-      <button type="submit" class="btn-submit" [disabled]="loading">
-        <span *ngIf="!loading">Sign In to SalesNotes</span>
-        <span *ngIf="loading" class="spinner">Verifying credentials...</span>
-      </button>
-    </form>
+      <div class="option-cards">
+        <div class="option-card" (click)="setMode('reset_old')">
+          <div class="option-icon">🔐</div>
+          <div class="option-content">
+            <h4>Option A: Confirm via Old Password</h4>
+            <p>Verify your identity using your previous or old password and set a new password immediately.</p>
+          </div>
+          <span class="option-arrow">&rarr;</span>
+        </div>
 
-    <!-- Quick Role Presets for Easy Demo/Testing -->
-    <div class="presets-section">
-      <div class="presets-label">Quick Sign-In by Role:</div>
-      <div class="preset-chips">
-        <button type="button" class="chip chip-superuser" (click)="selectPreset('sysadmin', 'SysAdmin@123')">
-          <span class="role-badge">SuperUser</span>
-          <span class="chip-text">sysadmin</span>
+        <div class="option-card" (click)="setMode('request_email')">
+          <div class="option-icon">✉️</div>
+          <div class="option-content">
+            <h4>Option B: Send Reset Link to Email</h4>
+            <p>Send a secure password reset link to your registered email address to set a new password.</p>
+          </div>
+          <span class="option-arrow">&rarr;</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-back" (click)="setMode('login')">
+        &larr; Back to Sign In
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 3: Reset Using Old Password                                  -->
+    <!-- ================================================================= -->
+    <div *ngIf="viewMode === 'reset_old'" class="recovery-flow">
+      <div class="flow-header">
+        <h3>Reset via Old Password Verification</h3>
+        <p>Enter your username and old password to authorize setting a new password.</p>
+      </div>
+
+      <form (ngSubmit)="submitResetUsingOld()" class="login-form">
+        <div class="form-group">
+          <label>Username or Email *</label>
+          <input
+            type="text"
+            [(ngModel)]="forgotUser"
+            name="forgotUser"
+            required
+            placeholder="e.g. sysadmin"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Current / Old Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="oldPwdInput"
+            name="oldPwdInput"
+            required
+            placeholder="Enter your current or old password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>New Password (min 6 characters) *</label>
+          <input
+            type="password"
+            [(ngModel)]="newPwdInput"
+            name="newPwdInput"
+            required
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Confirm New Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="confirmPwdInput"
+            name="confirmPwdInput"
+            required
+            placeholder="Re-enter new password"
+          />
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          {{ loading ? 'Verifying & Resetting...' : 'Verify Old Password & Save' }}
         </button>
-        <button type="button" class="chip chip-admin" (click)="selectPreset('companyadmin', 'Admin@123')">
-          <span class="role-badge">Admin</span>
-          <span class="chip-text">companyadmin</span>
+
+        <button type="button" class="btn-back" (click)="setMode('forgot_options')">
+          &larr; Choose Another Option
         </button>
-        <button type="button" class="chip chip-employee" (click)="selectPreset('companyemployee', 'User@123')">
-          <span class="role-badge">Sales Rep</span>
-          <span class="chip-text">companyemployee</span>
+      </form>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 4: Request Reset Link on Email                               -->
+    <!-- ================================================================= -->
+    <div *ngIf="viewMode === 'request_email'" class="recovery-flow">
+      <div class="flow-header">
+        <h3>Send Password Reset Link on Email</h3>
+        <p>Enter your registered username or email address below.</p>
+      </div>
+
+      <div *ngIf="!generatedToken">
+        <form (ngSubmit)="submitRequestEmailLink()" class="login-form">
+          <div class="form-group">
+            <label>Username or Email Address *</label>
+            <input
+              type="text"
+              [(ngModel)]="emailOrUserInput"
+              name="emailOrUserInput"
+              required
+              placeholder="e.g. sysadmin or user@company.com"
+            />
+          </div>
+
+          <button type="submit" class="btn-submit" [disabled]="loading">
+            {{ loading ? 'Generating & Sending Link...' : 'Send Password Reset Link' }}
+          </button>
+
+          <button type="button" class="btn-back" (click)="setMode('forgot_options')">
+            &larr; Choose Another Option
+          </button>
+        </form>
+      </div>
+
+      <!-- Link Dispatched Result -->
+      <div *ngIf="generatedToken" class="email-sent-card">
+        <div class="email-icon">📬</div>
+        <h4>Reset Link Dispatched!</h4>
+        <p>A password reset link has been generated for <strong>{{ generatedEmail || emailOrUserInput }}</strong>.</p>
+
+        <div class="simulated-link-box">
+          <span class="box-title">Direct Reset Link:</span>
+          <code>{{ generatedResetUrl }}</code>
+        </div>
+
+        <button type="button" class="btn-submit mt-2" (click)="goToTokenReset()">
+          Proceed to Set New Password &rarr;
+        </button>
+
+        <button type="button" class="btn-back" (click)="setMode('login')">
+          &larr; Back to Sign In
         </button>
       </div>
     </div>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 5: Set New Password with Token                               -->
+    <!-- ================================================================= -->
+    <div *ngIf="viewMode === 'reset_token'" class="recovery-flow">
+      <div class="flow-header">
+        <h3>Set New Password</h3>
+        <p>Enter your reset token and new password:</p>
+      </div>
+
+      <form (ngSubmit)="submitResetUsingToken()" class="login-form">
+        <div class="form-group">
+          <label>Reset Token *</label>
+          <input
+            type="text"
+            [(ngModel)]="tokenInput"
+            name="tokenInput"
+            required
+            placeholder="Paste reset token"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>New Password (min 6 characters) *</label>
+          <input
+            type="password"
+            [(ngModel)]="tokenNewPwd"
+            name="tokenNewPwd"
+            required
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Confirm New Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="tokenConfirmPwd"
+            name="tokenConfirmPwd"
+            required
+            placeholder="Re-enter new password"
+          />
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          {{ loading ? 'Saving Password...' : 'Save New Password & Sign In' }}
+        </button>
+
+        <button type="button" class="btn-back" (click)="setMode('login')">
+          &larr; Back to Sign In
+        </button>
+      </form>
+    </div>
+
   </div>
 </div>

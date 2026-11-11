@@ -1,12 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '@common/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -15,12 +17,35 @@ export class AppComponent {
   protected authService = inject(AuthService);
   protected router = inject(Router);
 
+  currentUrl = signal<string>(window.location.pathname);
+
+  // Change Password Modal State
+  showChangePasswordModal = false;
+  changePwdForm = {
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+  changePwdLoading = false;
+  changePwdError: string | null = null;
+  changePwdSuccess: string | null = null;
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentUrl.set(event.urlAfterRedirects || event.url);
+    });
+  }
+
   isLoggedIn(): boolean {
     return this.authService.isAuthenticated();
   }
 
-  isLoginPage(): boolean {
-    return this.router.url.startsWith('/login');
+  showNavigation(): boolean {
+    const url = this.currentUrl();
+    const isAuthRoute = url.includes('/login') || url.includes('/reset-password') || url.includes('/forgot-password') || url === '/' || url === '';
+    return this.isLoggedIn() && !isAuthRoute;
   }
 
   getCurrentUser() {
@@ -37,5 +62,53 @@ export class AppComponent {
 
   onLogout(): void {
     this.authService.logout();
+  }
+
+  openChangePasswordModal(): void {
+    this.changePwdForm = {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    };
+    this.changePwdError = null;
+    this.changePwdSuccess = null;
+    this.showChangePasswordModal = true;
+  }
+
+  closeChangePasswordModal(): void {
+    this.showChangePasswordModal = false;
+  }
+
+  submitChangePassword(): void {
+    if (!this.changePwdForm.oldPassword.trim() || !this.changePwdForm.newPassword.trim() || !this.changePwdForm.confirmPassword.trim()) {
+      this.changePwdError = 'All fields are required.';
+      return;
+    }
+    if (this.changePwdForm.newPassword.length < 6) {
+      this.changePwdError = 'New password must be at least 6 characters.';
+      return;
+    }
+    if (this.changePwdForm.newPassword !== this.changePwdForm.confirmPassword) {
+      this.changePwdError = 'New password and confirm password do not match.';
+      return;
+    }
+
+    this.changePwdLoading = true;
+    this.changePwdError = null;
+    this.changePwdSuccess = null;
+
+    this.authService.changePassword(this.changePwdForm).subscribe({
+      next: (res) => {
+        this.changePwdLoading = false;
+        this.changePwdSuccess = res.message || 'Password changed successfully!';
+        setTimeout(() => {
+          this.closeChangePasswordModal();
+        }, 1500);
+      },
+      error: (err) => {
+        this.changePwdLoading = false;
+        this.changePwdError = err?.error?.message || 'Failed to change password. Please verify your current password.';
+      }
+    });
   }
 }

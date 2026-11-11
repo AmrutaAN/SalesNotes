@@ -28,6 +28,36 @@
   border-radius: 6px;
   margin-bottom: 16px;
   font-size: 0.85rem;
+
+  .mt-1 { margin-top: 4px; }
+}
+
+.success-box {
+  background: #ecfdf5;
+  border-left: 3px solid #10b981;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+.forgot-link-wrap {
+  margin-top: -6px;
+  margin-bottom: 6px;
+}
+
+.recovery-section {
+  padding-top: 8px;
+}
+
+.token-result-box {
+  background: #f0fdf4;
+  border: 1px dashed #86efac;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  margin: 12px 0;
+  font-size: 0.85rem;
 }
 
 .demo-accounts {

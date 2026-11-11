@@ -11,10 +11,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
@@ -24,24 +29,68 @@ public class AuthService {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    // In-memory token store for forgot-password reset requests (token -> ResetTokenEntry)
+    private final Map<String, ResetTokenEntry> resetTokenStore = new ConcurrentHashMap<>();
+
+    private static class ResetTokenEntry {
+        final String username;
+        final String email;
+        final LocalDateTime expiresAt;
+
+        ResetTokenEntry(String username, String email, LocalDateTime expiresAt) {
+            this.username = username;
+            this.email = email;
+            this.expiresAt = expiresAt;
+        }
+
+        boolean isExpired() {
+            return LocalDateTime.now().isAfter(expiresAt);
+        }
+    }
 
     public AuthService(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             CustomUserDetailsService userDetailsService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public LoginResponse login(LoginRequest request) {
+        String input = request.getUsernameOrEmail().trim();
+
+        // 1. Locate user by username or email
+        Optional<User> userOpt = userRepository.findByUsernameIgnoreCase(input)
+                .or(() -> userRepository.findByEmailIgnoreCase(input));
+
+        if (userOpt.isEmpty()) {
+            throw new BadCredentialsException("Username or email '" + input + "' not found.");
+        }
+
+        User user = userOpt.get();
+
+        // 2. Validate password matches
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Wrong password entered for user '" + user.getUsername() + "'. Please verify your password or use 'Forgot Password'.");
+        }
+
+        // 3. Check active status
+        if (Boolean.FALSE.equals(user.getActive())) {
+            throw new BadCredentialsException("Account '" + user.getUsername() + "' has been deactivated. Please contact your administrator.");
+        }
+
         // Authenticate credentials
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsernameOrEmail().trim(),
+                        user.getUsername(),
                         request.getPassword()
                 )
         );
@@ -49,21 +98,122 @@ public class AuthService {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
         // Update last login timestamp
-        User user = userRepository.findById(principal.getId()).orElse(null);
-        if (user != null) {
-            user.setLastLoginAt(LocalDateTime.now());
-            userRepository.save(user);
-        }
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
 
         String accessToken = jwtService.generateAccessToken(principal);
         String refreshToken = jwtService.generateRefreshToken(principal);
 
-        UserResponse userResponse = user != null ? UserResponse.fromEntity(user) : null;
+        UserResponse userResponse = UserResponse.fromEntity(user);
         return new LoginResponse(
                 accessToken,
                 refreshToken,
                 jwtService.getAccessTokenExpirationMs(),
                 userResponse
+        );
+    }
+
+    public Map<String, Object> resetPasswordUsingOldPassword(VerifyOldPasswordRequest request) {
+        String input = request.getUsernameOrEmail().trim();
+        User user = userRepository.findByUsernameIgnoreCase(input)
+                .or(() -> userRepository.findByEmailIgnoreCase(input))
+                .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect current/old password. Please verify your old password.");
+        }
+
+        if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters long.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        userRepository.save(user);
+
+        return Map.of(
+                "success", true,
+                "message", "Password reset successfully using old password verification. You can now log in with your new password."
+        );
+    }
+
+    public Map<String, Object> requestPasswordResetLink(ForgotPasswordRequestDto request) {
+        String input = request.getUsernameOrEmail().trim();
+        User user = userRepository.findByUsernameIgnoreCase(input)
+                .or(() -> userRepository.findByEmailIgnoreCase(input))
+                .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
+
+        // Generate 32-character secure reset token valid for 30 minutes
+        String token = UUID.randomUUID().toString().replace("-", "");
+        resetTokenStore.put(token, new ResetTokenEntry(user.getUsername(), user.getEmail(), LocalDateTime.now().plusMinutes(30)));
+
+        String resetUrl = "/reset-password?token=" + token + "&user=" + user.getUsername();
+
+        return Map.of(
+                "success", true,
+                "message", "A password reset link has been dispatched to user's registered email.",
+                "token", token,
+                "resetUrl", resetUrl,
+                "email", user.getEmail()
+        );
+    }
+
+    public Map<String, Object> resetPasswordWithToken(ResetPasswordWithTokenDto request) {
+        String token = request.getToken().trim();
+        ResetTokenEntry entry = resetTokenStore.get(token);
+
+        if (entry == null || entry.isExpired()) {
+            throw new IllegalArgumentException("Password reset link/token is invalid or has expired. Please request a new link.");
+        }
+
+        User user = userRepository.findByUsernameIgnoreCase(entry.username)
+                .orElseThrow(() -> new IllegalArgumentException("User for token not found."));
+
+        if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters long.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        userRepository.save(user);
+
+        // Invalidate used token
+        resetTokenStore.remove(token);
+
+        return Map.of(
+                "success", true,
+                "message", "Password has been successfully reset. You can now sign in with your new password."
+        );
+    }
+
+    public Map<String, Object> changePassword(UserPrincipal principal, ChangePasswordRequest request) {
+        if (principal == null) {
+            throw new IllegalStateException("Authentication required to change password.");
+        }
+
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
+
+        if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters long.");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirm password do not match.");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password cannot be the same as the current password.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        userRepository.save(user);
+
+        return Map.of(
+                "success", true,
+                "message", "Your password has been changed successfully."
         );
     }
 

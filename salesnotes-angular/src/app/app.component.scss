@@ -1,4 +1,4 @@
-.app-container {
+.app-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -122,6 +122,18 @@
     }
   }
 
+  .btn-key {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    &:hover { background: #e2e8f0; }
+  }
+
   .btn-logout {
     background: transparent;
     color: #64748b;
@@ -149,6 +161,13 @@
   padding: 2rem 1.5rem;
 }
 
+.auth-content {
+  flex: 1;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
 .app-footer {
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
@@ -156,4 +175,73 @@
   text-align: center;
   color: #94a3b8;
   font-size: 0.85rem;
+}
+
+/* Modal for Change Password */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 { margin: 0; font-size: 1.15rem; color: #0f172a; }
+  .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+}
+
+.modal-body {
+  padding: 20px;
+
+  .alert-box {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+
+    &.alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    &.alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      outline: none;
+      &:focus { border-color: #2563eb; }
+    }
+  }
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #f8fafc;
 }

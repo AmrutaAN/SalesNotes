@@ -2,7 +2,16 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { LoginRequest, LoginResponse, AuthUser } from '../models/auth.model';
+import {
+  LoginRequest,
+  LoginResponse,
+  AuthUser,
+  VerifyOldPasswordRequest,
+  ForgotPasswordRequestDto,
+  ResetPasswordWithTokenDto,
+  ChangePasswordRequest,
+  PasswordActionResponse
+} from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -66,6 +75,22 @@ export class AuthService {
     // SuperUser has access to everything
     if (current === 'superuser') return true;
     return roles.some(r => r.toLowerCase() === current);
+  }
+
+  resetPasswordUsingOldPassword(data: VerifyOldPasswordRequest): Observable<PasswordActionResponse> {
+    return this.http.post<PasswordActionResponse>(`${this.apiUrl}/reset-password/verify-old`, data);
+  }
+
+  requestPasswordResetLink(data: ForgotPasswordRequestDto): Observable<PasswordActionResponse> {
+    return this.http.post<PasswordActionResponse>(`${this.apiUrl}/forgot-password/request-link`, data);
+  }
+
+  resetPasswordWithToken(data: ResetPasswordWithTokenDto): Observable<PasswordActionResponse> {
+    return this.http.post<PasswordActionResponse>(`${this.apiUrl}/forgot-password/reset`, data);
+  }
+
+  changePassword(data: ChangePasswordRequest): Observable<PasswordActionResponse> {
+    return this.http.post<PasswordActionResponse>(`${this.apiUrl}/change-password`, data);
   }
 
   private loadStoredUser(): AuthUser | null {

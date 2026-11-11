@@ -1,6 +1,6 @@
-<!-- Authenticated Layout -->
-<div *ngIf="isLoggedIn() && !isLoginPage()" class="app-container">
-  <header class="app-header">
+<div class="app-layout">
+  <!-- Top Navigation Bar: rendered ONLY when logged in and NOT on an auth/login screen -->
+  <header *ngIf="showNavigation()" class="app-header">
     <div class="header-inner">
       <div class="brand">
         <span class="brand-icon">💼</span>
@@ -33,22 +33,78 @@
           <span class="user-name">{{ user.fullname || user.username }}</span>
           <span class="role-pill" [attr.data-role]="user.role">{{ user.role }}</span>
         </div>
+        <button class="btn btn-outline btn-sm btn-key" (click)="openChangePasswordModal()" title="Change your password">
+          🔑 Password
+        </button>
         <a routerLink="/notes/new" class="btn btn-primary btn-sm">+ New Note</a>
         <button class="btn btn-outline btn-sm btn-logout" (click)="onLogout()">Logout</button>
       </div>
     </div>
   </header>
 
-  <main class="app-content">
+  <!-- Single Router Outlet: on startup, /login fills the whole page without interference -->
+  <main [class.app-content]="showNavigation()" [class.auth-content]="!showNavigation()">
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="app-footer">
+  <!-- Authenticated Footer -->
+  <footer *ngIf="showNavigation()" class="app-footer">
     <p>SalesNotes Platform &bull; Powered by Angular + Ionic + Spring Boot &bull; Common Component Pattern</p>
   </footer>
-</div>
 
-<!-- Unauthenticated / Login View -->
-<div *ngIf="!isLoggedIn() || isLoginPage()">
-  <router-outlet></router-outlet>
+  <!-- Modal: After-Login Change Password -->
+  <div *ngIf="showChangePasswordModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Change Account Password</h3>
+        <button class="close-btn" (click)="closeChangePasswordModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="changePwdSuccess" class="alert-box alert-success">
+          {{ changePwdSuccess }}
+        </div>
+        <div *ngIf="changePwdError" class="alert-box alert-danger">
+          {{ changePwdError }}
+        </div>
+
+        <div class="form-group">
+          <label>Current / Old Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="changePwdForm.oldPassword"
+            class="form-control"
+            placeholder="Enter current password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>New Password (min 6 characters) *</label>
+          <input
+            type="password"
+            [(ngModel)]="changePwdForm.newPassword"
+            class="form-control"
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Confirm New Password *</label>
+          <input
+            type="password"
+            [(ngModel)]="changePwdForm.confirmPassword"
+            class="form-control"
+            placeholder="Re-enter new password"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeChangePasswordModal()" [disabled]="changePwdLoading">Cancel</button>
+        <button class="btn btn-primary" (click)="submitChangePassword()" [disabled]="changePwdLoading">
+          {{ changePwdLoading ? 'Updating Password...' : 'Save New Password' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

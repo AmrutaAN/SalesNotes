@@ -40,10 +40,39 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser(principal));
     }
 
+    @PostMapping({"/api/v1/auth/reset-password/verify-old", "/api/auth/reset-password/verify-old"})
+    public ResponseEntity<Map<String, Object>> resetPasswordUsingOld(@Valid @RequestBody VerifyOldPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPasswordUsingOldPassword(request));
+    }
+
+    @PostMapping({"/api/v1/auth/forgot-password/request-link", "/api/auth/forgot-password/request-link"})
+    public ResponseEntity<Map<String, Object>> requestPasswordResetLink(@Valid @RequestBody ForgotPasswordRequestDto request) {
+        return ResponseEntity.ok(authService.requestPasswordResetLink(request));
+    }
+
+    @PostMapping({"/api/v1/auth/forgot-password/reset", "/api/auth/forgot-password/reset"})
+    public ResponseEntity<Map<String, Object>> resetPasswordWithToken(@Valid @RequestBody ResetPasswordWithTokenDto request) {
+        return ResponseEntity.ok(authService.resetPasswordWithToken(request));
+    }
+
+    @PostMapping({"/api/v1/auth/change-password", "/api/auth/change-password"})
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        return ResponseEntity.ok(authService.changePassword(principal, request));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Unauthorized", "message", "Invalid username or password"));
+                .body(Map.of("error", "Unauthorized", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Bad Request", "message", ex.getMessage()));
     }
 }
 

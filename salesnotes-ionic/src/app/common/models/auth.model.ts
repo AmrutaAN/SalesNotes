@@ -31,3 +31,33 @@ export interface RoleItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface VerifyOldPasswordRequest {
+  usernameOrEmail: string;
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ForgotPasswordRequestDto {
+  usernameOrEmail: string;
+}
+
+export interface ResetPasswordWithTokenDto {
+  token: string;
+  usernameOrEmail: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface PasswordActionResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  resetUrl?: string;
+  email?: string;
+}

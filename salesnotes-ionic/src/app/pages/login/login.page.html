@@ -8,64 +8,185 @@
   <div class="login-container">
     <ion-card class="login-card">
       <ion-card-header class="ion-text-center">
-        <ion-card-title>Sign In</ion-card-title>
-        <ion-card-subtitle>Enter into system using authorized credentials</ion-card-subtitle>
+        <ion-card-title>
+          {{ viewMode === 'login' ? 'Sign In' : (viewMode === 'forgot_options' ? 'Account Recovery' : 'Reset Password') }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          {{ viewMode === 'login' ? 'Enter into system using authorized credentials' : 'Recover or reset your account password' }}
+        </ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
-        <div *ngIf="errorMessage" class="error-box">
-          <ion-text color="danger">{{ errorMessage }}</ion-text>
+        <!-- Success Alert -->
+        <div *ngIf="successNotice" class="success-box">
+          <ion-text color="success">{{ successNotice }}</ion-text>
         </div>
 
-        <form (ngSubmit)="onSubmit()">
-          <ion-item lines="inset" class="input-item">
-            <ion-icon name="person-outline" slot="start" color="medium"></ion-icon>
-            <ion-input
-              label="Username"
-              labelPlacement="floating"
-              [(ngModel)]="username"
-              name="username"
-              required
-              autocomplete="username"
-            ></ion-input>
-          </ion-item>
-
-          <ion-item lines="inset" class="input-item">
-            <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
-            <ion-input
-              label="Password"
-              labelPlacement="floating"
-              type="password"
-              [(ngModel)]="password"
-              name="password"
-              required
-              autocomplete="current-password"
-            ></ion-input>
-          </ion-item>
-
-          <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
-            <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
-            <ion-icon *ngIf="!loading" name="log-in-outline" slot="start"></ion-icon>
-            {{ loading ? 'Signing in...' : 'Sign In' }}
-          </ion-button>
-        </form>
-
-        <div class="demo-accounts ion-margin-top">
-          <ion-text color="medium">
-            <small>Quick Demo Roles:</small>
-          </ion-text>
-          <div class="demo-buttons">
-            <ion-button size="small" fill="outline" color="tertiary" (click)="selectPreset('sysadmin', 'SysAdmin@123')">
-              SuperUser
-            </ion-button>
-            <ion-button size="small" fill="outline" color="primary" (click)="selectPreset('companyadmin', 'Admin@123')">
-              Admin
-            </ion-button>
-            <ion-button size="small" fill="outline" color="success" (click)="selectPreset('companyemployee', 'User@123')">
-              Field Rep
+        <!-- Error Alert -->
+        <div *ngIf="errorMessage" class="error-box">
+          <ion-text color="danger">{{ errorMessage }}</ion-text>
+          <div *ngIf="viewMode === 'login' && errorMessage.toLowerCase().includes('wrong password')" class="mt-1">
+            <ion-button size="small" fill="clear" color="danger" (click)="setMode('forgot_options')">
+              Reset your password now &rarr;
             </ion-button>
           </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: Regular Login Form                 -->
+        <!-- ========================================== -->
+        <div *ngIf="viewMode === 'login'">
+          <form (ngSubmit)="onSubmit()">
+            <ion-item lines="inset" class="input-item">
+              <ion-icon name="person-outline" slot="start" color="medium"></ion-icon>
+              <ion-input
+                label="Username or Email"
+                labelPlacement="floating"
+                [(ngModel)]="username"
+                name="username"
+                required
+                autocomplete="username"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item lines="inset" class="input-item">
+              <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
+              <ion-input
+                label="Password"
+                labelPlacement="floating"
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                required
+                autocomplete="current-password"
+              ></ion-input>
+            </ion-item>
+
+            <div class="ion-text-end forgot-link-wrap">
+              <ion-button fill="clear" size="small" color="primary" (click)="setMode('forgot_options')">
+                Forgot Password?
+              </ion-button>
+            </div>
+
+            <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
+              <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!loading" name="log-in-outline" slot="start"></ion-icon>
+              {{ loading ? 'Signing in...' : 'Sign In' }}
+            </ion-button>
+          </form>
+
+          <div class="demo-accounts ion-margin-top">
+            <ion-text color="medium">
+              <small>Quick Demo Roles:</small>
+            </ion-text>
+            <div class="demo-buttons">
+              <ion-button size="small" fill="outline" color="tertiary" (click)="selectPreset('sysadmin', 'SysAdmin@123')">
+                SuperUser
+              </ion-button>
+              <ion-button size="small" fill="outline" color="primary" (click)="selectPreset('companyadmin', 'Admin@123')">
+                Admin
+              </ion-button>
+              <ion-button size="small" fill="outline" color="success" (click)="selectPreset('companyemployee', 'User@123')">
+                Field Rep
+              </ion-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: Recovery Options                   -->
+        <!-- ========================================== -->
+        <div *ngIf="viewMode === 'forgot_options'" class="recovery-section">
+          <ion-button expand="block" fill="outline" color="primary" class="ion-margin-bottom" (click)="setMode('reset_old')">
+            Option A: Confirm via Old Password
+          </ion-button>
+          <ion-button expand="block" fill="outline" color="secondary" class="ion-margin-bottom" (click)="setMode('request_email')">
+            Option B: Send Reset Link on Email
+          </ion-button>
+
+          <ion-button expand="block" fill="clear" color="medium" (click)="setMode('login')">
+            &larr; Back to Sign In
+          </ion-button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: Reset Using Old Password           -->
+        <!-- ========================================== -->
+        <div *ngIf="viewMode === 'reset_old'" class="recovery-section">
+          <form (ngSubmit)="submitResetUsingOld()">
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="Username *" labelPlacement="floating" [(ngModel)]="forgotUser" name="forgotUser" required></ion-input>
+            </ion-item>
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="Current/Old Password *" labelPlacement="floating" type="password" [(ngModel)]="oldPwdInput" name="oldPwdInput" required></ion-input>
+            </ion-item>
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="New Password (min 6 chars) *" labelPlacement="floating" type="password" [(ngModel)]="newPwdInput" name="newPwdInput" required></ion-input>
+            </ion-item>
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="Confirm New Password *" labelPlacement="floating" type="password" [(ngModel)]="confirmPwdInput" name="confirmPwdInput" required></ion-input>
+            </ion-item>
+
+            <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
+              {{ loading ? 'Verifying & Saving...' : 'Verify Old & Save Password' }}
+            </ion-button>
+            <ion-button expand="block" fill="clear" color="medium" (click)="setMode('forgot_options')">
+              &larr; Back
+            </ion-button>
+          </form>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: Request Email Reset Link           -->
+        <!-- ========================================== -->
+        <div *ngIf="viewMode === 'request_email'" class="recovery-section">
+          <div *ngIf="!generatedToken">
+            <form (ngSubmit)="submitRequestEmailLink()">
+              <ion-item lines="inset" class="input-item">
+                <ion-input label="Username or Email *" labelPlacement="floating" [(ngModel)]="emailOrUserInput" name="emailOrUserInput" required></ion-input>
+              </ion-item>
+              <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
+                {{ loading ? 'Sending...' : 'Send Reset Link' }}
+              </ion-button>
+              <ion-button expand="block" fill="clear" color="medium" (click)="setMode('forgot_options')">
+                &larr; Back
+              </ion-button>
+            </form>
+          </div>
+
+          <div *ngIf="generatedToken" class="token-result-box">
+            <p><strong>Reset Link Dispatched!</strong></p>
+            <p><small>{{ generatedResetUrl }}</small></p>
+            <ion-button expand="block" (click)="goToTokenReset()">
+              Set New Password &rarr;
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: Set New Password with Token        -->
+        <!-- ========================================== -->
+        <div *ngIf="viewMode === 'reset_token'" class="recovery-section">
+          <form (ngSubmit)="submitResetUsingToken()">
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="Reset Token *" labelPlacement="floating" [(ngModel)]="tokenInput" name="tokenInput" required></ion-input>
+            </ion-item>
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="New Password (min 6 chars) *" labelPlacement="floating" type="password" [(ngModel)]="tokenNewPwd" name="tokenNewPwd" required></ion-input>
+            </ion-item>
+            <ion-item lines="inset" class="input-item">
+              <ion-input label="Confirm New Password *" labelPlacement="floating" type="password" [(ngModel)]="tokenConfirmPwd" name="tokenConfirmPwd" required></ion-input>
+            </ion-item>
+
+            <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
+              {{ loading ? 'Saving...' : 'Save New Password' }}
+            </ion-button>
+            <ion-button expand="block" fill="clear" color="medium" (click)="setMode('login')">
+              &larr; Back to Sign In
+            </ion-button>
+          </form>
+        </div>
+
       </ion-card-content>
     </ion-card>
   </div>
