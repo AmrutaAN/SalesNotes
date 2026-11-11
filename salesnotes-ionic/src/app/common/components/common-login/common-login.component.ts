@@ -43,6 +43,44 @@ export class CommonLoginComponent implements OnInit {
   tokenNewPwd = '';
   tokenConfirmPwd = '';
 
+  // Password visibility toggle states
+  showPassword = false;
+  showOldPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+  showTokenNewPassword = false;
+  showTokenConfirmPassword = false;
+
+  toggleShowPassword(): void {
+    this.showPassword = !this.showPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleShowOldPassword(): void {
+    this.showOldPassword = !this.showOldPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleShowNewPassword(): void {
+    this.showNewPassword = !this.showNewPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleShowConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleShowTokenNewPassword(): void {
+    this.showTokenNewPassword = !this.showTokenNewPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleShowTokenConfirmPassword(): void {
+    this.showTokenConfirmPassword = !this.showTokenConfirmPassword;
+    this.cdr.markForCheck();
+  }
+
   ngOnInit(): void {
     const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
     if (queryReturnUrl) {
@@ -65,6 +103,12 @@ export class CommonLoginComponent implements OnInit {
     this.viewMode = mode;
     this.errorMessage = null;
     this.successNotice = null;
+    this.showPassword = false;
+    this.showOldPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
+    this.showTokenNewPassword = false;
+    this.showTokenConfirmPassword = false;
     if (mode === 'login') {
       // keep username if typed
     } else if (mode === 'forgot_options' && this.username.trim()) {

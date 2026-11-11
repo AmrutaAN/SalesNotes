@@ -31,6 +31,25 @@ export class AppComponent {
   changePwdError: string | null = null;
   changePwdSuccess: string | null = null;
 
+  showModalOldPassword = false;
+  showModalNewPassword = false;
+  showModalConfirmPassword = false;
+
+  toggleModalOldPassword(): void {
+    this.showModalOldPassword = !this.showModalOldPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleModalNewPassword(): void {
+    this.showModalNewPassword = !this.showModalNewPassword;
+    this.cdr.markForCheck();
+  }
+
+  toggleModalConfirmPassword(): void {
+    this.showModalConfirmPassword = !this.showModalConfirmPassword;
+    this.cdr.markForCheck();
+  }
+
   constructor() {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -71,6 +90,9 @@ export class AppComponent {
       newPassword: '',
       confirmPassword: ''
     };
+    this.showModalOldPassword = false;
+    this.showModalNewPassword = false;
+    this.showModalConfirmPassword = false;
     this.changePwdError = null;
     this.changePwdSuccess = null;
     this.showChangePasswordModal = true;

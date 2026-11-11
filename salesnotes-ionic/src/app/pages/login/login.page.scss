@@ -19,6 +19,18 @@
 .input-item {
   --background: transparent;
   margin-bottom: 12px;
+
+  .eye-toggle-ion-btn {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
+    height: 36px;
+    align-self: center;
+
+    ion-icon {
+      font-size: 1.25rem;
+    }
+  }
 }
 
 .error-box {

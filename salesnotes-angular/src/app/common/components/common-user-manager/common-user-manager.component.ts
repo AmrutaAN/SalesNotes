@@ -25,6 +25,7 @@ export abstract class CommonUserManagerComponent implements OnInit {
 
   showCreateModal = false;
   showEditModal = false;
+  showNewUserPassword = false;
   selectedUser: User | null = null;
 
   newUserForm: {
@@ -99,6 +100,10 @@ export abstract class CommonUserManagerComponent implements OnInit {
     this.loadUsers();
   }
 
+  toggleShowNewUserPassword(): void {
+    this.showNewUserPassword = !this.showNewUserPassword;
+  }
+
   openCreateModal(): void {
     this.newUserForm = {
       username: '',
@@ -108,6 +113,7 @@ export abstract class CommonUserManagerComponent implements OnInit {
       role: this.roles.length > 0 ? this.roles[0].code : 'companyemployee',
       active: true
     };
+    this.showNewUserPassword = false;
     this.errorMessage = '';
     this.successMessage = '';
     this.showCreateModal = true;

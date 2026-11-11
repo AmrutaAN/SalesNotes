@@ -1,23 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { App } from './app.component';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { AppComponent } from './app.component';
 
-describe('App', () => {
+describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [AppComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([])
+      ]
     }).compileComponents();
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
+    const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, salesnotes-angular');
+  it('should toggle modal password visibility', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    expect(app.showModalOldPassword).toBe(false);
+    app.toggleModalOldPassword();
+    expect(app.showModalOldPassword).toBe(true);
+    app.toggleModalOldPassword();
+    expect(app.showModalOldPassword).toBe(false);
+
+    expect(app.showModalNewPassword).toBe(false);
+    app.toggleModalNewPassword();
+    expect(app.showModalNewPassword).toBe(true);
+
+    expect(app.showModalConfirmPassword).toBe(false);
+    app.toggleModalConfirmPassword();
+    expect(app.showModalConfirmPassword).toBe(true);
   });
 });

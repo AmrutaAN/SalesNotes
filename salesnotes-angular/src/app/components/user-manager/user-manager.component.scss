@@ -308,6 +308,52 @@
       box-sizing: border-box;
     }
     .form-hint { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+
+      .form-control {
+        width: 100%;
+        padding-right: 40px;
+        box-sizing: border-box;
+      }
+
+      .eye-toggle-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        padding: 4px;
+        margin: 0;
+        cursor: pointer;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        line-height: 1;
+        transition: color 0.15s, background-color 0.15s;
+
+        &:hover {
+          color: #0f172a;
+          background-color: #f1f5f9;
+        }
+
+        &:focus-visible {
+          outline: 2px solid #2563eb;
+          outline-offset: 1px;
+        }
+
+        svg {
+          display: block;
+        }
+      }
+    }
   }
 
   .role-preview-box {

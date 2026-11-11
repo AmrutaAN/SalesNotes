@@ -19,7 +19,7 @@ import {
   IonText
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { lockClosedOutline, personOutline, logInOutline } from 'ionicons/icons';
+import { lockClosedOutline, personOutline, logInOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { CommonLoginComponent } from '@common/components/common-login/common-login.component';
 
 @Component({
@@ -51,7 +51,7 @@ export class LoginIonicPage extends CommonLoginComponent {
   constructor() {
     super();
     this.returnUrl = '/tabs/dashboard';
-    addIcons({ lockClosedOutline, personOutline, logInOutline });
+    addIcons({ lockClosedOutline, personOutline, logInOutline, eyeOutline, eyeOffOutline });
   }
 
   override ngOnInit(): void {

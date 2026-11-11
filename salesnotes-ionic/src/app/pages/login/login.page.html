@@ -54,12 +54,22 @@
               <ion-input
                 label="Password"
                 labelPlacement="floating"
-                type="password"
+                [type]="showPassword ? 'text' : 'password'"
                 [(ngModel)]="password"
                 name="password"
                 required
                 autocomplete="current-password"
               ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowPassword()"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [title]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
 
             <div class="ion-text-end forgot-link-wrap">
@@ -118,13 +128,64 @@
               <ion-input label="Username *" labelPlacement="floating" [(ngModel)]="forgotUser" name="forgotUser" required></ion-input>
             </ion-item>
             <ion-item lines="inset" class="input-item">
-              <ion-input label="Current/Old Password *" labelPlacement="floating" type="password" [(ngModel)]="oldPwdInput" name="oldPwdInput" required></ion-input>
+              <ion-input
+                label="Current/Old Password *"
+                labelPlacement="floating"
+                [type]="showOldPassword ? 'text' : 'password'"
+                [(ngModel)]="oldPwdInput"
+                name="oldPwdInput"
+                required
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowOldPassword()"
+                [attr.aria-label]="showOldPassword ? 'Hide password' : 'Show password'"
+                [title]="showOldPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showOldPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
             <ion-item lines="inset" class="input-item">
-              <ion-input label="New Password (min 6 chars) *" labelPlacement="floating" type="password" [(ngModel)]="newPwdInput" name="newPwdInput" required></ion-input>
+              <ion-input
+                label="New Password (min 6 chars) *"
+                labelPlacement="floating"
+                [type]="showNewPassword ? 'text' : 'password'"
+                [(ngModel)]="newPwdInput"
+                name="newPwdInput"
+                required
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowNewPassword()"
+                [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'"
+                [title]="showNewPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
             <ion-item lines="inset" class="input-item">
-              <ion-input label="Confirm New Password *" labelPlacement="floating" type="password" [(ngModel)]="confirmPwdInput" name="confirmPwdInput" required></ion-input>
+              <ion-input
+                label="Confirm New Password *"
+                labelPlacement="floating"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="confirmPwdInput"
+                name="confirmPwdInput"
+                required
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowConfirmPassword()"
+                [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                [title]="showConfirmPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
 
             <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
@@ -172,10 +233,44 @@
               <ion-input label="Reset Token *" labelPlacement="floating" [(ngModel)]="tokenInput" name="tokenInput" required></ion-input>
             </ion-item>
             <ion-item lines="inset" class="input-item">
-              <ion-input label="New Password (min 6 chars) *" labelPlacement="floating" type="password" [(ngModel)]="tokenNewPwd" name="tokenNewPwd" required></ion-input>
+              <ion-input
+                label="New Password (min 6 chars) *"
+                labelPlacement="floating"
+                [type]="showTokenNewPassword ? 'text' : 'password'"
+                [(ngModel)]="tokenNewPwd"
+                name="tokenNewPwd"
+                required
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowTokenNewPassword()"
+                [attr.aria-label]="showTokenNewPassword ? 'Hide password' : 'Show password'"
+                [title]="showTokenNewPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showTokenNewPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
             <ion-item lines="inset" class="input-item">
-              <ion-input label="Confirm New Password *" labelPlacement="floating" type="password" [(ngModel)]="tokenConfirmPwd" name="tokenConfirmPwd" required></ion-input>
+              <ion-input
+                label="Confirm New Password *"
+                labelPlacement="floating"
+                [type]="showTokenConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="tokenConfirmPwd"
+                name="tokenConfirmPwd"
+                required
+              ></ion-input>
+              <ion-button
+                fill="clear"
+                slot="end"
+                class="eye-toggle-ion-btn"
+                (click)="toggleShowTokenConfirmPassword()"
+                [attr.aria-label]="showTokenConfirmPassword ? 'Hide password' : 'Show password'"
+                [title]="showTokenConfirmPassword ? 'Hide password' : 'Show password'"
+              >
+                <ion-icon slot="icon-only" [name]="showTokenConfirmPassword ? 'eye-off-outline' : 'eye-outline'" color="medium"></ion-icon>
+              </ion-button>
             </ion-item>
 
             <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">

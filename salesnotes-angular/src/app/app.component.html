@@ -70,32 +70,89 @@
 
         <div class="form-group">
           <label>Current / Old Password *</label>
-          <input
-            type="password"
-            [(ngModel)]="changePwdForm.oldPassword"
-            class="form-control"
-            placeholder="Enter current password"
-          />
+          <div class="password-input-wrapper">
+            <input
+              [type]="showModalOldPassword ? 'text' : 'password'"
+              [(ngModel)]="changePwdForm.oldPassword"
+              class="form-control"
+              placeholder="Enter current password"
+            />
+            <button
+              type="button"
+              class="eye-toggle-btn"
+              (click)="toggleModalOldPassword()"
+              [attr.aria-label]="showModalOldPassword ? 'Hide password' : 'Show password'"
+              [title]="showModalOldPassword ? 'Hide password' : 'Show password'"
+              tabindex="-1"
+            >
+              <svg *ngIf="!showModalOldPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showModalOldPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
           <label>New Password (min 6 characters) *</label>
-          <input
-            type="password"
-            [(ngModel)]="changePwdForm.newPassword"
-            class="form-control"
-            placeholder="Enter new password"
-          />
+          <div class="password-input-wrapper">
+            <input
+              [type]="showModalNewPassword ? 'text' : 'password'"
+              [(ngModel)]="changePwdForm.newPassword"
+              class="form-control"
+              placeholder="Enter new password"
+            />
+            <button
+              type="button"
+              class="eye-toggle-btn"
+              (click)="toggleModalNewPassword()"
+              [attr.aria-label]="showModalNewPassword ? 'Hide password' : 'Show password'"
+              [title]="showModalNewPassword ? 'Hide password' : 'Show password'"
+              tabindex="-1"
+            >
+              <svg *ngIf="!showModalNewPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showModalNewPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
           <label>Confirm New Password *</label>
-          <input
-            type="password"
-            [(ngModel)]="changePwdForm.confirmPassword"
-            class="form-control"
-            placeholder="Re-enter new password"
-          />
+          <div class="password-input-wrapper">
+            <input
+              [type]="showModalConfirmPassword ? 'text' : 'password'"
+              [(ngModel)]="changePwdForm.confirmPassword"
+              class="form-control"
+              placeholder="Re-enter new password"
+            />
+            <button
+              type="button"
+              class="eye-toggle-btn"
+              (click)="toggleModalConfirmPassword()"
+              [attr.aria-label]="showModalConfirmPassword ? 'Hide password' : 'Show password'"
+              [title]="showModalConfirmPassword ? 'Hide password' : 'Show password'"
+              tabindex="-1"
+            >
+              <svg *ngIf="!showModalConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg *ngIf="showModalConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
