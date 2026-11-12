@@ -34,6 +34,9 @@ public class User {
     @Column(nullable = false, length = 320)
     private String email;
 
+    @Column(name = "mail", length = 320)
+    private String mail;
+
     @NotBlank(message = "Password is required")
     @Column(nullable = false)
     private String password;
@@ -76,6 +79,7 @@ public class User {
         this.username = username;
         this.fullname = fullname;
         this.email = email;
+        this.mail = email;
         this.password = password;
         this.role = role;
         this.active = true;
@@ -101,11 +105,21 @@ public class User {
         if (this.role == null) {
             this.role = UserRole.COMPANYEMPLOYEE;
         }
+        if ((this.mail == null || this.mail.isBlank()) && this.email != null) {
+            this.mail = this.email;
+        } else if ((this.email == null || this.email.isBlank()) && this.mail != null) {
+            this.email = this.mail;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedat = LocalDateTime.now();
+        if ((this.mail == null || this.mail.isBlank()) && this.email != null) {
+            this.mail = this.email;
+        } else if ((this.email == null || this.email.isBlank()) && this.mail != null) {
+            this.email = this.mail;
+        }
     }
 
     public String getId() {
@@ -146,6 +160,20 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+        if (this.mail == null || this.mail.isBlank()) {
+            this.mail = email;
+        }
+    }
+
+    public String getMail() {
+        return (mail != null && !mail.isBlank()) ? mail : email;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+        if (this.email == null || this.email.isBlank()) {
+            this.email = mail;
+        }
     }
 
     public String getPassword() {

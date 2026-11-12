@@ -30,6 +30,9 @@ class AuthTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private com.salesnotes.service.AuthService authService;
+
     @Test
     @DisplayName("Should successfully login seeded companyadmin and return JWT access token")
     void shouldLoginCompanyAdmin() throws Exception {
@@ -107,19 +110,23 @@ class AuthTests {
     }
 
     @Test
-    @DisplayName("Should request password reset link and reset password using token")
+    @DisplayName("Should request password reset link sent to mail (not on screen) and reset password using token")
     void shouldResetPasswordUsingToken() throws Exception {
         com.salesnotes.dto.ForgotPasswordRequestDto linkReq = new com.salesnotes.dto.ForgotPasswordRequestDto("companyemployee");
 
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/forgot-password/request-link")
+        mockMvc.perform(post("/api/v1/auth/forgot-password/request-link")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(linkReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.resetUrl").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.maskedEmail").isNotEmpty())
+                .andExpect(jsonPath("$.emailSent").value(true))
+                .andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(jsonPath("$.resetUrl").doesNotExist());
 
-        String token = objectMapper.readTree(result.getResponse().getContentAsString()).get("token").asText();
+        // Simulate user retrieving token from their email inbox
+        String token = authService.getActiveResetTokenForUser("companyemployee");
+        assertThat(token).isNotNull().hasSize(32);
 
         // Complete reset using token
         com.salesnotes.dto.ResetPasswordWithTokenDto resetReq = new com.salesnotes.dto.ResetPasswordWithTokenDto(

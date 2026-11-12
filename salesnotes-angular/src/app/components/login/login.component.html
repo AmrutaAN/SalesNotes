@@ -288,7 +288,7 @@
         <p>Enter your registered username or email address below.</p>
       </div>
 
-      <div *ngIf="!generatedToken">
+      <div *ngIf="!emailLinkSent">
         <form (ngSubmit)="submitRequestEmailLink()" class="login-form">
           <div class="form-group">
             <label>Username or Email Address *</label>
@@ -302,7 +302,7 @@
           </div>
 
           <button type="submit" class="btn-submit" [disabled]="loading">
-            {{ loading ? 'Generating & Sending Link...' : 'Send Password Reset Link' }}
+            {{ loading ? 'Sending Reset Link to Email...' : 'Send Password Reset Link' }}
           </button>
 
           <button type="button" class="btn-back" (click)="setMode('forgot_options')">
@@ -311,25 +311,19 @@
         </form>
       </div>
 
-      <!-- Link Dispatched Result -->
-      <div *ngIf="generatedToken" class="email-sent-card">
+      <!-- Link Dispatched Result (Sent to mailbox; NOT displayed on screen) -->
+      <div *ngIf="emailLinkSent" class="email-sent-card">
         <div class="email-icon">📬</div>
-        <h4>Reset Link Dispatched!</h4>
-        <p>A password reset link has been generated for <strong>{{ generatedEmail || emailOrUserInput }}</strong>.</p>
+        <h4>Reset Link Sent to Email!</h4>
+        <p>A secure password reset link has been dispatched to your registered email address<span *ngIf="maskedTargetEmail"> (<strong>{{ maskedTargetEmail }}</strong>)</span>.</p>
+        <p class="email-hint">Please open your email inbox and click the link to set your new password. The link will expire in 30 minutes.</p>
 
-        <div class="simulated-link-box">
-          <span class="box-title">Direct Reset Link:</span>
-          <a class="direct-link-url" (click)="goToTokenReset()" title="Click to open reset form with this token">
-            {{ generatedResetUrl }}
-          </a>
-        </div>
-
-        <button type="button" class="btn-submit mt-2" (click)="goToTokenReset()">
-          Proceed to Set New Password &rarr;
+        <button type="button" class="btn-submit mt-2" (click)="setMode('login')">
+          &larr; Back to Sign In
         </button>
 
-        <button type="button" class="btn-back" (click)="setMode('login')">
-          &larr; Back to Sign In
+        <button type="button" class="btn-back mt-2" (click)="goToTokenReset()">
+          Received token in your email? Enter token manually &rarr;
         </button>
       </div>
     </div>

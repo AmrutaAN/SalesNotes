@@ -201,13 +201,13 @@
         <!-- VIEW 4: Request Email Reset Link           -->
         <!-- ========================================== -->
         <div *ngIf="viewMode === 'request_email'" class="recovery-section">
-          <div *ngIf="!generatedToken">
+          <div *ngIf="!emailLinkSent">
             <form (ngSubmit)="submitRequestEmailLink()">
               <ion-item lines="inset" class="input-item">
                 <ion-input label="Username or Email *" labelPlacement="floating" [(ngModel)]="emailOrUserInput" name="emailOrUserInput" required></ion-input>
               </ion-item>
               <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loading">
-                {{ loading ? 'Sending...' : 'Send Reset Link' }}
+                {{ loading ? 'Sending to Email...' : 'Send Reset Link' }}
               </ion-button>
               <ion-button expand="block" fill="clear" color="medium" (click)="setMode('forgot_options')">
                 &larr; Back
@@ -215,11 +215,16 @@
             </form>
           </div>
 
-          <div *ngIf="generatedToken" class="token-result-box">
-            <p><strong>Reset Link Dispatched!</strong></p>
-            <p><small>{{ generatedResetUrl }}</small></p>
-            <ion-button expand="block" (click)="goToTokenReset()">
-              Set New Password &rarr;
+          <!-- Link Dispatched Result (Sent to mailbox; NOT displayed on screen) -->
+          <div *ngIf="emailLinkSent" class="token-result-box">
+            <p><strong>Reset Link Sent to Email!</strong></p>
+            <p><small>A secure password reset link has been dispatched to your registered email address<span *ngIf="maskedTargetEmail"> (<strong>{{ maskedTargetEmail }}</strong>)</span>.</small></p>
+            <p><small>Please open your email inbox and click the link to choose your new password. The link will expire in 30 minutes.</small></p>
+            <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="setMode('login')">
+              &larr; Back to Sign In
+            </ion-button>
+            <ion-button expand="block" fill="clear" size="small" (click)="goToTokenReset()">
+              Enter token manually &rarr;
             </ion-button>
           </div>
         </div>

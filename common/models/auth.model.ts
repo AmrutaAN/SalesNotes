@@ -61,4 +61,6 @@ export interface PasswordActionResponse {
   token?: string;
   resetUrl?: string;
   email?: string;
+  maskedEmail?: string;
+  emailSent?: boolean;
 }

@@ -30,6 +30,7 @@ public class AuthService {
     private final CustomUserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // In-memory token store for forgot-password reset requests (token -> ResetTokenEntry)
     private final Map<String, ResetTokenEntry> resetTokenStore = new ConcurrentHashMap<>();
@@ -55,13 +56,15 @@ public class AuthService {
             JwtService jwtService,
             CustomUserDetailsService userDetailsService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            EmailService emailService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -142,19 +145,46 @@ public class AuthService {
                 .or(() -> userRepository.findFirstByEmailIgnoreCase(input))
                 .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
 
+        // Retrieve user's mail from table users.mail / users.email
+        String targetEmail = (user.getMail() != null && !user.getMail().isBlank())
+                ? user.getMail().trim()
+                : user.getEmail().trim();
+
         // Generate 32-character secure reset token valid for 30 minutes
         String token = UUID.randomUUID().toString().replace("-", "");
-        resetTokenStore.put(token, new ResetTokenEntry(user.getUsername(), user.getEmail(), LocalDateTime.now().plusMinutes(30)));
+        resetTokenStore.put(token, new ResetTokenEntry(user.getUsername(), targetEmail, LocalDateTime.now().plusMinutes(30)));
 
-        String resetUrl = "/reset-password?token=" + token + "&user=" + user.getUsername();
+        // Send reset link directly to user's mail; strictly NOT returned to screen
+        emailService.sendPasswordResetEmail(targetEmail, user.getUsername(), token);
 
         return Map.of(
                 "success", true,
-                "message", "A password reset link has been dispatched to user's registered email.",
-                "token", token,
-                "resetUrl", resetUrl,
-                "email", user.getEmail()
+                "message", "A password reset link has been dispatched to your registered email address.",
+                "maskedEmail", maskEmail(targetEmail),
+                "emailSent", true
         );
+    }
+
+    // Helper accessible for tests to simulate reading token delivered via email
+    public String getActiveResetTokenForUser(String username) {
+        return resetTokenStore.entrySet().stream()
+                .filter(e -> e.getValue().username.equalsIgnoreCase(username) && !e.getValue().isExpired())
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String maskEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            return "your registered email";
+        }
+        int atIdx = email.indexOf('@');
+        String name = email.substring(0, atIdx);
+        String domain = email.substring(atIdx);
+        if (name.length() <= 2) {
+            return name.charAt(0) + "***" + domain;
+        }
+        return name.charAt(0) + "***" + name.charAt(name.length() - 1) + domain;
     }
 
     public Map<String, Object> resetPasswordWithToken(ResetPasswordWithTokenDto request) {

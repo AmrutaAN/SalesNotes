@@ -31,8 +31,10 @@ export class CommonLoginComponent implements OnInit {
   newPwdInput = '';
   confirmPwdInput = '';
 
-  // Forgot password - Method B (Email reset link & token)
+  // Forgot password - Method B (Email reset link sent to mailbox, NOT displayed on screen)
   emailOrUserInput = '';
+  emailLinkSent = false;
+  maskedTargetEmail = '';
   generatedToken = '';
   generatedResetUrl = '';
   generatedEmail = '';
@@ -120,6 +122,8 @@ export class CommonLoginComponent implements OnInit {
     this.showConfirmPassword = false;
     this.showTokenNewPassword = false;
     this.showTokenConfirmPassword = false;
+    this.emailLinkSent = false;
+    this.maskedTargetEmail = '';
     if (mode === 'request_email') {
       this.generatedToken = '';
       this.generatedResetUrl = '';
@@ -246,12 +250,15 @@ export class CommonLoginComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.loading = false;
-        this.generatedToken = res.token || '';
-        this.generatedResetUrl = res.resetUrl || '';
-        this.generatedEmail = res.email || '';
-        this.tokenInput = res.token || '';
-        this.tokenUser = this.emailOrUserInput.trim();
-        this.successNotice = res.message;
+        this.emailLinkSent = true;
+        this.maskedTargetEmail = res.maskedEmail || res.email || '';
+        // Security policy: token and resetUrl are delivered to user's mail, never held in memory for screen display
+        this.generatedToken = '';
+        this.generatedResetUrl = '';
+        this.generatedEmail = '';
+        this.tokenInput = '';
+        this.tokenUser = '';
+        this.successNotice = res.message || 'A password reset link has been dispatched to your registered email address.';
         this.cdr.markForCheck();
       },
       error: (err) => {
