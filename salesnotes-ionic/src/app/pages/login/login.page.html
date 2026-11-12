@@ -223,20 +223,14 @@
             <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="setMode('login')">
               &larr; Back to Sign In
             </ion-button>
-            <ion-button expand="block" fill="clear" size="small" (click)="goToTokenReset()">
-              Enter token manually &rarr;
-            </ion-button>
           </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW 5: Set New Password with Token        -->
+        <!-- VIEW 5: Set New Password                   -->
         <!-- ========================================== -->
         <div *ngIf="viewMode === 'reset_token'" class="recovery-section">
           <form (ngSubmit)="submitResetUsingToken()">
-            <ion-item lines="inset" class="input-item">
-              <ion-input label="Reset Token *" labelPlacement="floating" [(ngModel)]="tokenInput" name="tokenInput" required></ion-input>
-            </ion-item>
             <ion-item lines="inset" class="input-item">
               <ion-input
                 label="New Password (min 6 chars) *"

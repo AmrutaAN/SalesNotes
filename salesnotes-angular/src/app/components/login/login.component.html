@@ -321,47 +321,24 @@
         <button type="button" class="btn-submit mt-2" (click)="setMode('login')">
           &larr; Back to Sign In
         </button>
-
-        <button type="button" class="btn-back mt-2" (click)="goToTokenReset()">
-          Received token in your email? Enter token manually &rarr;
-        </button>
       </div>
     </div>
 
     <!-- ================================================================= -->
-    <!-- VIEW 5: Set New Password with Token                               -->
+    <!-- VIEW 5: Set New Password                                          -->
     <!-- ================================================================= -->
     <div *ngIf="viewMode === 'reset_token'" class="recovery-flow">
       <div class="flow-header">
         <h3>Set New Password</h3>
-        <p>Enter your reset token and new password:</p>
+        <p>Create a new password for your account:</p>
       </div>
 
       <form (ngSubmit)="submitResetUsingToken()" class="login-form">
+        <input type="hidden" [(ngModel)]="tokenInput" name="tokenInput" />
+
         <div class="account-pill-box" *ngIf="tokenUser">
           <span class="pill-label">Resetting Password For:</span>
           <span class="pill-value">{{ tokenUser }}</span>
-        </div>
-
-        <div class="form-group" *ngIf="!tokenUser">
-          <label>Username or Email Address (optional)</label>
-          <input
-            type="text"
-            [(ngModel)]="tokenUser"
-            name="tokenUser"
-            placeholder="e.g. sysadmin or user@company.com"
-          />
-        </div>
-
-        <div class="form-group">
-          <label>Reset Token *</label>
-          <input
-            type="text"
-            [(ngModel)]="tokenInput"
-            name="tokenInput"
-            required
-            placeholder="Paste reset token"
-          />
         </div>
 
         <div class="form-group">

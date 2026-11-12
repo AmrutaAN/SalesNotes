@@ -24,10 +24,10 @@ public class EmailService {
     private String frontendUrl;
 
     /**
-     * Dispatches password reset email to user's mail address in table users.mail / users.email.
-     * The reset link and token are delivered strictly to the user's inbox and never exposed on the web UI.
+     * Dispatches password reset email to user's email address in table users.email.
+     * The reset link is delivered strictly to the user's inbox and never exposed on the web UI.
      *
-     * @param recipientEmail Target email from users.mail / users.email column
+     * @param recipientEmail Target email from users.email column
      * @param username       User's account username
      * @param token          Secure 32-character reset token
      */
@@ -36,7 +36,7 @@ public class EmailService {
 
         log.info("================================================================================");
         log.info("[SalesNotes Email Service] PASSWORD RESET EMAIL DISPATCHED");
-        log.info("Recipient (users.mail / users.email): {}", recipientEmail);
+        log.info("Recipient (users.email)            : {}", recipientEmail);
         log.info("Target Account Username            : {}", username);
         log.info("Reset Link Delivered to Mail       : {}", resetLink);
         log.info("Token Validity                     : 30 minutes");

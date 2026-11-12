@@ -30,7 +30,6 @@ CREATE TABLE `users` (
   `username` VARCHAR(255) NOT NULL,
   `fullname` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
-  `mail` VARCHAR(255) NULL,
   `password` VARCHAR(255) NOT NULL,
   `role` VARCHAR(50) NOT NULL,
   `active` TINYINT(1) NOT NULL DEFAULT 1,

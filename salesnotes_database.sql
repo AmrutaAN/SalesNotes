@@ -80,7 +80,6 @@ CREATE TABLE `users` (
   `username` VARCHAR(100) NOT NULL,
   `fullname` VARCHAR(200) NOT NULL,
   `email` VARCHAR(320) NOT NULL,
-  `mail` VARCHAR(320) NULL,
   `password` VARCHAR(255) NOT NULL,
   `role` VARCHAR(50) NOT NULL,
   `phone` VARCHAR(30) NULL,

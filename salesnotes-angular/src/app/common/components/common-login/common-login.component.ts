@@ -275,10 +275,15 @@ export class CommonLoginComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  // --- Scenario 1C: Complete reset using token/link ---
+  // --- Scenario 1C: Complete reset using email link ---
   submitResetUsingToken(): void {
-    if (!this.tokenInput.trim() || !this.tokenNewPwd.trim() || !this.tokenConfirmPwd.trim()) {
-      this.errorMessage = 'Reset token, new password, and confirm password are required.';
+    if (!this.tokenInput.trim()) {
+      this.errorMessage = 'Reset link is invalid or missing. Please click the link sent to your email or request a new one.';
+      this.cdr.markForCheck();
+      return;
+    }
+    if (!this.tokenNewPwd.trim() || !this.tokenConfirmPwd.trim()) {
+      this.errorMessage = 'Please enter and confirm your new password.';
       this.cdr.markForCheck();
       return;
     }
@@ -305,7 +310,7 @@ export class CommonLoginComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.loading = false;
-        this.successNotice = res.message || 'Password reset successfully! Please sign in.';
+        this.successNotice = res.message || 'Password reset successfully! Please sign in with your new password.';
         this.username = this.tokenUser.trim();
         this.password = '';
         this.tokenInput = '';
@@ -316,7 +321,7 @@ export class CommonLoginComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = err?.error?.message || 'Invalid or expired reset token.';
+        this.errorMessage = err?.error?.message || 'Invalid or expired password reset link. Please request a new link.';
         this.cdr.markForCheck();
       }
     });

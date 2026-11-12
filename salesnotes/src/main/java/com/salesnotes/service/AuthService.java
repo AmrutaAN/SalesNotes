@@ -145,16 +145,14 @@ public class AuthService {
                 .or(() -> userRepository.findFirstByEmailIgnoreCase(input))
                 .orElseThrow(() -> new IllegalArgumentException("Account with username or email '" + input + "' not found."));
 
-        // Retrieve user's mail from table users.mail / users.email
-        String targetEmail = (user.getMail() != null && !user.getMail().isBlank())
-                ? user.getMail().trim()
-                : user.getEmail().trim();
+        // Retrieve user's email from table users.email
+        String targetEmail = user.getEmail().trim();
 
         // Generate 32-character secure reset token valid for 30 minutes
         String token = UUID.randomUUID().toString().replace("-", "");
         resetTokenStore.put(token, new ResetTokenEntry(user.getUsername(), targetEmail, LocalDateTime.now().plusMinutes(30)));
 
-        // Send reset link directly to user's mail; strictly NOT returned to screen
+        // Send reset link directly to user's email; strictly NOT returned to screen
         emailService.sendPasswordResetEmail(targetEmail, user.getUsername(), token);
 
         return Map.of(
